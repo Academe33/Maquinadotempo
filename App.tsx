@@ -1,50 +1,35 @@
 import React, { useState, useMemo } from 'react';
 import { Character } from './types';
-import { INITIAL_CHARACTERS } from './constants';
+import { CharacterProvider, useCharacters } from './contexts/CharacterContext';
 import CharacterCard from './components/CharacterCard';
 import LiveConversation from './components/LiveConversation';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import AdminPanel from './components/AdminPanel';
+import { Settings } from 'lucide-react';
 
-const ITEMS_PER_PAGE = 8;
-
-const App: React.FC = () => {
+const AppContent: React.FC = () => {
+  const { characters } = useCharacters();
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [selectedCategory, setSelectedCategory] = useState<string>('Todos');
-
+  const [showAdmin, setShowAdmin] = useState(false);
+  
   const categories = useMemo(() => {
-    const cats = Array.from(new Set(INITIAL_CHARACTERS.map(c => c.category)));
-    return ['Todos', ...cats];
-  }, []);
+    return Array.from(new Set(characters.map(c => c.category)));
+  }, [characters]);
+
+  const [selectedCategory, setSelectedCategory] = useState<string>(categories[0]);
+
+  // Update selected category if it doesn't exist anymore (e.g. after reset)
+  React.useEffect(() => {
+    if (!categories.includes(selectedCategory) && categories.length > 0) {
+      setSelectedCategory(categories[0]);
+    }
+  }, [categories, selectedCategory]);
 
   const filteredCharacters = useMemo(() => {
-    if (selectedCategory === 'Todos') return INITIAL_CHARACTERS;
-    return INITIAL_CHARACTERS.filter(c => c.category === selectedCategory);
-  }, [selectedCategory]);
-
-  const totalPages = Math.ceil(filteredCharacters.length / ITEMS_PER_PAGE);
-
-  const currentCharacters = useMemo(() => {
-    const start = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredCharacters.slice(start, start + ITEMS_PER_PAGE);
-  }, [currentPage, filteredCharacters]);
-
-  const handlePageChange = (newPage: number) => {
-    setCurrentPage(newPage);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+    return characters.filter(c => c.category === selectedCategory);
+  }, [selectedCategory, characters]);
 
   const handleCategoryChange = (category: string) => {
     setSelectedCategory(category);
-    setCurrentPage(1);
-  };
-
-  const handlePrevPage = () => {
-    if (currentPage > 1) handlePageChange(currentPage - 1);
-  };
-
-  const handleNextPage = () => {
-    if (currentPage < totalPages) handlePageChange(currentPage + 1);
   };
 
   if (selectedCharacter) {
@@ -57,7 +42,18 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
+    <div className="min-h-screen bg-[#0a0a0a] text-white relative">
+      {/* Admin Toggle */}
+      <button 
+        onClick={() => setShowAdmin(true)}
+        className="fixed bottom-6 right-6 p-3 bg-zinc-900/50 hover:bg-red-900/50 text-zinc-500 hover:text-red-500 rounded-full transition-all duration-300 z-40 backdrop-blur-sm border border-zinc-800 hover:border-red-500/30"
+        title="Painel Administrativo"
+      >
+        <Settings className="w-5 h-5" />
+      </button>
+
+      {showAdmin && <AdminPanel onClose={() => setShowAdmin(false)} />}
+
       {/* Hero Section */}
       <div className="max-w-7xl mx-auto pt-20 px-6 text-center">
         <header className="mb-20">
@@ -72,7 +68,7 @@ const App: React.FC = () => {
         {/* Gallery Section - Paginated */}
         <section className="mb-24">
           <h2 className="text-4xl font-bold text-blue-500 mb-8">
-            Galeria de Personalidades
+            {selectedCategory}
           </h2>
 
           {/* Category Filter */}
@@ -92,28 +88,8 @@ const App: React.FC = () => {
             ))}
           </div>
 
-          <div className="flex items-center justify-center gap-6 mb-12">
-            <button 
-              onClick={handlePrevPage}
-              disabled={currentPage === 1}
-              className="p-3 rounded-full bg-zinc-800 hover:bg-zinc-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-            >
-              <ChevronLeft className="w-6 h-6" />
-            </button>
-            <span className="text-xl font-medium text-gray-300">
-              {currentPage} de {totalPages}
-            </span>
-            <button 
-              onClick={handleNextPage}
-              disabled={currentPage === totalPages}
-              className="p-3 rounded-full bg-zinc-800 hover:bg-zinc-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-            >
-              <ChevronRight className="w-6 h-6" />
-            </button>
-          </div>
-          
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {currentCharacters.map((char) => (
+            {filteredCharacters.map((char) => (
               <CharacterCard 
                 key={char.id} 
                 character={char} 
@@ -132,6 +108,14 @@ const App: React.FC = () => {
         </div>
       </footer>
     </div>
+  );
+};
+
+const App: React.FC = () => {
+  return (
+    <CharacterProvider>
+      <AppContent />
+    </CharacterProvider>
   );
 };
 

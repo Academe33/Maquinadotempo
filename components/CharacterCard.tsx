@@ -8,6 +8,15 @@ interface CharacterCardProps {
 }
 
 const CharacterCard: React.FC<CharacterCardProps> = ({ character, onClick }) => {
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    const target = e.target as HTMLImageElement;
+    // Prevent infinite loop by checking if we already retried or set fallback
+    if (target.src.includes('ui-avatars.com')) return;
+    
+    // Fallback to UI Avatars if original image fails
+    target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(character.name)}&background=random&size=256`;
+  };
+
   return (
     <div 
       onClick={() => onClick(character)}
@@ -21,10 +30,7 @@ const CharacterCard: React.FC<CharacterCardProps> = ({ character, onClick }) => 
             alt={character.name} 
             referrerPolicy="no-referrer"
             className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
-            onError={(e) => {
-              const target = e.target as HTMLImageElement;
-              target.src = character.image + "?retry=" + Date.now();
-            }}
+            onError={handleImageError}
           />
         </div>
       </div>
