@@ -1,0 +1,7 @@
+{
+  "name": "PersonaChat - Tutores Históricos",
+  "description": "Uma plataforma educacional interativa onde você pode conversar em tempo real com personalidades históricas e fictícias usando IA de voz avançada.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
