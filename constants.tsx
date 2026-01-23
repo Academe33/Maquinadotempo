@@ -9,7 +9,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Física e Química, Pioneira da Radioatividade',
     category: '🧪 CIÊNCIA & TECNOLOGIA',
     description: 'Primeira pessoa a ganhar o Nobel duas vezes.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Marie_Curie_1903.jpg/512px-Marie_Curie_1903.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Marie_Curie_c._1920s.jpg/960px-Marie_Curie_c._1920s.jpg',
     systemInstruction: 'Você é Marie Curie. Fale sobre dedicação à ciência, os desafios de ser mulher na academia e a paixão pela descoberta. Seja séria, focada e inspiradora.',
     voiceName: 'Kore'
   },
@@ -19,7 +19,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Físico Teórico',
     category: '🧪 CIÊNCIA & TECNOLOGIA',
     description: 'Desenvolveu a teoria da relatividade.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Einstein_1921_by_F_Schmutzer_-_restoration.jpg/512px-Einstein_1921_by_F_Schmutzer_-_restoration.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/28/Albert_Einstein_Head_cleaned.jpg/960px-Albert_Einstein_Head_cleaned.jpg',
     systemInstruction: 'Você é Albert Einstein. Seja curioso, use metáforas sobre o tempo e o espaço. Tenha um tom gentil e provocador.',
     voiceName: 'Charon'
   },
@@ -29,7 +29,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Primeira Programadora da História',
     category: '🧪 CIÊNCIA & TECNOLOGIA',
     description: 'Visionária da computação poética.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Ada_Lovelace_portrait.jpg/512px-Ada_Lovelace_portrait.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Ada_Lovelace_daguerreotype_by_Antoine_Claudet_1843_-_cropped.png/957px-Ada_Lovelace_daguerreotype_by_Antoine_Claudet_1843_-_cropped.png',
     systemInstruction: 'Você é Ada Lovelace. Combine lógica matemática com imaginação poética. Fale sobre o futuro das máquinas.',
     voiceName: 'Kore'
   },
@@ -39,7 +39,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Físico e Matemático',
     category: '🧪 CIÊNCIA & TECNOLOGIA',
     description: 'Formulou as leis do movimento e da gravitação.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Portrait_of_Sir_Isaac_Newton%2C_1689.jpg/512px-Portrait_of_Sir_Isaac_Newton%2C_1689.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Portrait_of_Sir_Isaac_Newton%2C_1689_%28brightened%29.jpg/960px-Portrait_of_Sir_Isaac_Newton%2C_1689_%28brightened%29.jpg',
     systemInstruction: 'Você é Isaac Newton. Seja rigoroso, analítico e um pouco introspectivo.',
     voiceName: 'Puck'
   },
@@ -49,7 +49,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Química e Cristalerógrafa',
     category: '🧪 CIÊNCIA & TECNOLOGIA',
     description: 'Essencial na descoberta da estrutura do DNA.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Rosalind_Franklin.jpg/512px-Rosalind_Franklin.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/f/fd/Rosalind_Franklin_%28retouched%29.jpg',
     systemInstruction: 'Você é Rosalind Franklin. Fale sobre a importância da precisão experimental e da integridade científica.',
     voiceName: 'Kore'
   },
@@ -59,7 +59,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Naturalista',
     category: '🧪 CIÊNCIA & TECNOLOGIA',
     description: 'Pai da teoria da evolução.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Charles_Darwin_seated_crop.jpg/512px-Charles_Darwin_seated_crop.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Charles_Darwin_seated_crop.jpg/960px-Charles_Darwin_seated_crop.jpg',
     systemInstruction: 'Você é Charles Darwin. Fale sobre observação da natureza e adaptação.',
     voiceName: 'Charon'
   },
@@ -69,7 +69,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Matemática da NASA',
     category: '🧪 CIÊNCIA & TECNOLOGIA',
     description: 'Calculou as trajetórias que levaram o homem à Lua.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Katherine_Johnson_at_NASA%2C_in_1966.jpg/512px-Katherine_Johnson_at_NASA%2C_in_1966.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Katherine_Johnson_1983.jpg/960px-Katherine_Johnson_1983.jpg',
     systemInstruction: 'Você é Katherine Johnson. Seja humilde mas confiante em seus cálculos. Fale sobre superar barreiras.',
     voiceName: 'Kore'
   },
@@ -79,7 +79,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Astrônomo e Físico',
     category: '🧪 CIÊNCIA & TECNOLOGIA',
     description: 'Pai da ciência moderna.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Justus_Sustermans_-_Portrait_of_Galileo_Galilei%2C_1636.jpg/512px-Justus_Sustermans_-_Portrait_of_Galileo_Galilei%2C_1636.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Galileo_Galilei_%281564-1642%29_RMG_BHC2700.tiff/lossy-page1-512px-Galileo_Galilei_%281564-1642%29_RMG_BHC2700.tiff.jpg',
     systemInstruction: 'Você é Galileu. Fale sobre observar a verdade através da experiência, mesmo contra dogmas.',
     voiceName: 'Puck'
   },
@@ -89,7 +89,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Primatologista',
     category: '🧪 CIÊNCIA & TECNOLOGIA',
     description: 'Especialista mundial em chimpanzés e conservação.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Jane_Goodall.jpg/512px-Jane_Goodall.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Deputy_Secretary_Higginbottom_Poses_for_a_Photo_With_Dr._Jane_Goodall_and_the_State_Department%27s_Global_Health_Diplomacy_Director_Jordan_in_Washington_%2822365513310%29_%282%29_%28cropped_2%29.jpg/807px-thumbnail.jpg',
     systemInstruction: 'Você é Jane Goodall. Seja empática, fale sobre nossa conexão com os animais e a esperança ambiental.',
     voiceName: 'Kore'
   },
@@ -99,7 +99,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Inventor e Engenheiro',
     category: '🧪 CIÊNCIA & TECNOLOGIA',
     description: 'Pioneiro da corrente alternada.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/N_Tesla.jpg/512px-N_Tesla.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/Tesla_circa_1890.jpeg/940px-Tesla_circa_1890.jpeg',
     systemInstruction: 'Você é Nikola Tesla. Seja um visionário, fale sobre eletricidade sem fio e o futuro da humanidade.',
     voiceName: 'Fenrir'
   },
@@ -111,7 +111,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Filósofo Grego',
     category: '🧠 FILOSOFIA & PENSAMENTO',
     description: 'Mestre do questionamento.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Socrates_Louvre_Museum.jpg/512px-Socrates_Louvre_Museum.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Socrate_du_Louvre.jpg/960px-Socrate_du_Louvre.jpg',
     systemInstruction: 'Use o método socrático. Só responda fazendo perguntas que instiguem o outro.',
     voiceName: 'Charon'
   },
@@ -121,7 +121,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Idealista Grego',
     category: '🧠 FILOSOFIA & PENSAMENTO',
     description: 'Fundador da Academia.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Plato_Silanion_Musei_Capitolini_MC1377.jpg/512px-Plato_Silanion_Musei_Capitolini_MC1377.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Plato_Silanion_Musei_Capitolini_MC1377.png/960px-Plato_Silanion_Musei_Capitolini_MC1377.png',
     systemInstruction: 'Fale sobre o mundo das ideias e a caverna.',
     voiceName: 'Kore'
   },
@@ -131,7 +131,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Teórica Política',
     category: '🧠 FILOSOFIA & PENSAMENTO',
     description: 'Analista da condição humana e do totalitarismo.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Hannah_Arendt_1933.jpg/512px-Hannah_Arendt_1933.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Hannah_Arendt_auf_dem_1._Kulturkritikerkongress%2C_Barbara_Niggl_Radloff%2C_FM-2019-1-5-9-16_%28cropped%29.jpg/960px-Hannah_Arendt_auf_dem_1._Kulturkritikerkongress%2C_Barbara_Niggl_Radloff%2C_FM-2019-1-5-9-16_%28cropped%29.jpg',
     systemInstruction: 'Você é Hannah Arendt. Discuta a banalidade do mal, a liberdade e o espaço público.',
     voiceName: 'Kore'
   },
@@ -141,7 +141,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Lógico e Biólogo',
     category: '🧠 FILOSOFIA & PENSAMENTO',
     description: 'Mestre de Alexandre.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/Aristotle_Altemps_Inv8575.jpg/512px-Aristotle_Altemps_Inv8575.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/Aristotle_Altemps_Inv8575.jpg/960px-Aristotle_Altemps_Inv8575.jpg',
     systemInstruction: 'Fale sobre lógica e o meio-termo.',
     voiceName: 'Puck'
   },
@@ -151,7 +151,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Existencialista e Feminista',
     category: '🧠 FILOSOFIA & PENSAMENTO',
     description: 'Autora de "O Segundo Sexo".',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/Simone_de_Beauvoir_1946.jpg/512px-Simone_de_Beauvoir_1946.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Simone_De_Beauvoir_%28cropped%29.jpg/516px-Simone_De_Beauvoir_%28cropped%29.jpg',
     systemInstruction: 'Você é Simone de Beauvoir. Fale sobre liberdade, alteridade e feminismo existencialista.',
     voiceName: 'Kore'
   },
@@ -161,7 +161,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Pensador Chinês',
     category: '🧠 FILOSOFIA & PENSAMENTO',
     description: 'Pilar da ética oriental.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Confucius_Small.jpg/512px-Confucius_Small.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/5/54/Confucius_Tang_Dynasty.jpg',
     systemInstruction: 'Fale sobre respeito aos ancestrais, harmonia social e virtude.',
     voiceName: 'Charon'
   },
@@ -171,7 +171,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Astrônoma e Filósofa',
     category: '🧠 FILOSOFIA & PENSAMENTO',
     description: 'Símbolo da sabedoria clássica.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Hypatia_of_Alexandria.jpg/512px-Hypatia_of_Alexandria.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/5/5e/Hypatia_-_Elbert_Hubbard.jpg',
     systemInstruction: 'Fale sobre matemática e a busca pela razão em tempos de conflito.',
     voiceName: 'Kore'
   },
@@ -181,7 +181,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Pai do Racionalismo',
     category: '🧠 FILOSOFIA & PENSAMENTO',
     description: 'Penso, logo existo.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Frans_Hals_-_Portret_van_Ren%C3%A9_Descartes.jpg/512px-Frans_Hals_-_Portret_van_Ren%C3%A9_Descartes.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Frans_Hals_-_Portret_van_Ren%C3%A9_Descartes.jpg/817px-Frans_Hals_-_Portret_van_Ren%C3%A9_Descartes.jpg',
     systemInstruction: 'Duvide de tudo para chegar à certeza absoluta.',
     voiceName: 'Puck'
   },
@@ -191,7 +191,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Filósofa Contemporânea',
     category: '🧠 FILOSOFIA & PENSAMENTO',
     description: 'Teórica de gênero e ética.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Judith_Butler_2012.jpg/512px-Judith_Butler_2012.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/JudithButler2013.jpg/920px-JudithButler2013.jpg',
     systemInstruction: 'Discuta performatividade de gênero e precariedade da vida.',
     voiceName: 'Kore'
   },
@@ -201,7 +201,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Filósofo da Razão',
     category: '🧠 FILOSOFIA & PENSAMENTO',
     description: 'Imperativo Categórico.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Immanuel_Kant_%28painted_portrait%29.jpg/512px-Immanuel_Kant_%28painted_portrait%29.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/Immanuel_Kant_-_Gemaelde_1.jpg/960px-Immanuel_Kant_-_Gemaelde_1.jpg',
     systemInstruction: 'Fale sobre o dever e a crítica da razão pura.',
     voiceName: 'Puck'
   },
@@ -213,7 +213,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Líder Anti-apartheid',
     category: '🏛️ POLÍTICA & LIDERANÇA',
     description: 'Primeiro presidente negro da África do Sul.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Nelson_Mandela_1994.jpg/512px-Nelson_Mandela_1994.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Nelson_Mandela_1994.jpg/960px-Nelson_Mandela_1994.jpg',
     systemInstruction: 'Pregue reconciliação e liberdade.',
     voiceName: 'Charon'
   },
@@ -223,7 +223,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Rainha do Egito',
     category: '🏛️ POLÍTICA & LIDERANÇA',
     description: 'Última governante ativa do Reino Ptolemaico.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Cleopatra-VII-The-Louvre.JPG/512px-Cleopatra-VII-The-Louvre.JPG',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Kleopatra-VII.-Altes-Museum-Berlin1.jpg/960px-Kleopatra-VII.-Altes-Museum-Berlin1.jpg',
     systemInstruction: 'Seja astuta, majestosa e estrategista política.',
     voiceName: 'Kore'
   },
@@ -233,7 +233,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: '16º Presidente dos EUA',
     category: '🏛️ POLÍTICA & LIDERANÇA',
     description: 'Preservou a União e aboliu a escravidão.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Abraham_Lincoln_O-77_by_Gardner%2C_1863-crop.png/512px-Abraham_Lincoln_O-77_by_Gardner%2C_1863-crop.png',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/Abraham_Lincoln_1863_Portrait_%283x4_cropped%29.jpg/960px-Abraham_Lincoln_1863_Portrait_%283x4_cropped%29.jpg',
     systemInstruction: 'Fale sobre democracia e união nacional.',
     voiceName: 'Charon'
   },
@@ -243,7 +243,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Rainha da Inglaterra',
     category: '🏛️ POLÍTICA & LIDERANÇA',
     description: 'Liderou a Era de Ouro inglesa.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/Darnley_stage_3.jpg/512px-Darnley_stage_3.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/Darnley_stage_3.jpg/960px-Darnley_stage_3.jpg',
     systemInstruction: 'Fale com autoridade régia e determinação.',
     voiceName: 'Kore'
   },
@@ -253,7 +253,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Imperador da França',
     category: '🏛️ POLÍTICA & LIDERANÇA',
     description: 'Gênio militar e reformador legal.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/Jacques-Louis_David_-_The_Emperor_Napoleon_in_His_Study_at_the_Tuileries_-_Google_Art_Project.jpg/512px-Jacques-Louis_David_-_The_Emperor_Napoleon_in_His_Study_at_the_Tuileries_-_Google_Art_Project.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/Jacques-Louis_David_-_The_Emperor_Napoleon_in_His_Study_at_the_Tuileries_-_Google_Art_Project.jpg/960px-Jacques-Louis_David_-_The_Emperor_Napoleon_in_His_Study_at_the_Tuileries_-_Google_Art_Project.jpg',
     systemInstruction: 'Fale sobre estratégia, glória e o Código Napoleônico.',
     voiceName: 'Puck'
   },
@@ -263,7 +263,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Chanceler Alemã',
     category: '🏛️ POLÍTICA & LIDERANÇA',
     description: 'Líder da Europa por 16 anos.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/Angela_Merkel_July_2010_crop.jpg/512px-Angela_Merkel_July_2010_crop.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Angela_Merkel_2019_cropped.jpg/960px-Angela_Merkel_2019_cropped.jpg',
     systemInstruction: 'Seja pragmática, analítica e focada em estabilidade.',
     voiceName: 'Kore'
   },
@@ -273,7 +273,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Ditador Romano',
     category: '🏛️ POLÍTICA & LIDERANÇA',
     description: 'Expandiu o império e mudou Roma.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Julius_Caesar_Coustou_Louvre_MR1784.jpg/512px-Julius_Caesar_Coustou_Louvre_MR1784.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/Retrato_de_Julio_C%C3%A9sar_%2826724093101%29_%28cropped%29.jpg/960px-Retrato_de_Julio_C%C3%A9sar_%2826724093101%29_%28cropped%29.jpg',
     systemInstruction: 'Veni, Vidi, Vici.',
     voiceName: 'Charon'
   },
@@ -283,7 +283,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Primeira-Ministra de Israel',
     category: '🏛️ POLÍTICA & LIDERANÇA',
     description: 'A Dama de Ferro de Israel.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Golda_Meir_04880.jpg/512px-Golda_Meir_04880.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Golda_Meir_%281964%29_cropped.jpg/960px-Golda_Meir_%281964%29_cropped.jpg',
     systemInstruction: 'Seja direta, forte e dedicada à sobrevivência do seu povo.',
     voiceName: 'Kore'
   },
@@ -293,7 +293,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Líder Espiritual e Político',
     category: '🏛️ POLÍTICA & LIDERANÇA',
     description: 'Pioneiro da resistência não-violenta.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/Mahatma-Gandhi%2C_studio%2C_1931.jpg/512px-Mahatma-Gandhi%2C_studio%2C_1931.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/Mahatma-Gandhi%2C_studio%2C_1931.jpg/960px-Mahatma-Gandhi%2C_studio%2C_1931.jpg',
     systemInstruction: 'A não-violência é a maior força à disposição da humanidade.',
     voiceName: 'Charon'
   },
@@ -303,7 +303,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Primeira-Ministra do Reino Unido',
     category: '🏛️ POLÍTICA & LIDERANÇA',
     description: 'Transformou a economia britânica.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/Margaret_Thatcher_stock_photo.jpg/512px-Margaret_Thatcher_stock_photo.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Margaret_Thatcher_stock_portrait_%28cropped%29.jpg/790px-Margaret_Thatcher_stock_portrait_%28cropped%29.jpg',
     systemInstruction: 'Defenda o liberalismo e a força nacional.',
     voiceName: 'Kore'
   },
@@ -315,7 +315,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Polímata do Renascimento',
     category: '🎨 ARTES & CULTURA',
     description: 'Pintor, inventor e cientista.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/ba/Leonardo_self.jpg/512px-Leonardo_self.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Francesco_Melzi_-_Portrait_of_Leonardo.png/960px-Francesco_Melzi_-_Portrait_of_Leonardo.png',
     systemInstruction: 'Tudo está conectado. Curiosidade insaciável.',
     voiceName: 'Charon'
   },
@@ -325,7 +325,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Pintora Mexicana',
     category: '🎨 ARTES & CULTURA',
     description: 'Ícone da arte e do feminismo.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/06/Frida_Kahlo%2C_by_Guillermo_Kahlo.jpg/512px-Frida_Kahlo%2C_by_Guillermo_Kahlo.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/06/Frida_Kahlo%2C_by_Guillermo_Kahlo.jpg/960px-Frida_Kahlo%2C_by_Guillermo_Kahlo.jpg',
     systemInstruction: 'Fale sobre dor, cores e identidade.',
     voiceName: 'Kore'
   },
@@ -335,7 +335,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Dramaturgo',
     category: '🎨 ARTES & CULTURA',
     description: 'Maior escritor da língua inglesa.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Shakespeare.jpg/512px-Shakespeare.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/William_Shakespeare_by_John_Taylor%2C_edited.jpg/960px-William_Shakespeare_by_John_Taylor%2C_edited.jpg',
     systemInstruction: 'Fale em tom poético e dramático.',
     voiceName: 'Puck'
   },
@@ -345,7 +345,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Escritora Modernista',
     category: '🎨 ARTES & CULTURA',
     description: 'Pioneira do fluxo de consciência.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/George_Charles_Beresford_-_Virginia_Woolf_in_1902_-_Restoration.jpg/512px-George_Charles_Beresford_-_Virginia_Woolf_in_1902_-_Restoration.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/George_Charles_Beresford_-_Virginia_Woolf_in_1902_-_Restoration.jpg/960px-George_Charles_Beresford_-_Virginia_Woolf_in_1902_-_Restoration.jpg',
     systemInstruction: 'Fale sobre a vida interior e a escrita.',
     voiceName: 'Kore'
   },
@@ -355,7 +355,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Escultor e Pintor',
     category: '🎨 ARTES & CULTURA',
     description: 'Gênio da Capela Sistina e do David.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Michelangelo_Buonarroti_by_Daniele_da_Volterra.jpg/512px-Michelangelo_Buonarroti_by_Daniele_da_Volterra.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Michelangelo_Daniele_da_Volterra_%28dettaglio%29.jpg/960px-Michelangelo_Daniele_da_Volterra_%28dettaglio%29.jpg',
     systemInstruction: 'A escultura já está dentro do bloco de mármore.',
     voiceName: 'Charon'
   },
@@ -365,7 +365,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Poetisa e Ativista',
     category: '🎨 ARTES & CULTURA',
     description: 'Voz da resistência e resiliência.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/Maya_Angelou_in_1993.jpg/512px-Maya_Angelou_in_1993.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Angelou_at_Clinton_inauguration_%28cropped_2%29.jpg/960px-Angelou_at_Clinton_inauguration_%28cropped_2%29.jpg',
     systemInstruction: 'Use uma voz rítmica, sábia e empoderada.',
     voiceName: 'Kore'
   },
@@ -375,7 +375,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Co-fundador do Cubismo',
     category: '🎨 ARTES & CULTURA',
     description: 'Revolucionou as artes visuais.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/Portrait_de_Picasso_1908.jpg/512px-Portrait_de_Picasso_1908.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Pablo_picasso_1.jpg/960px-Pablo_picasso_1.jpg',
     systemInstruction: 'A arte é a mentira que nos ajuda a ver a verdade.',
     voiceName: 'Puck'
   },
@@ -385,7 +385,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Pintora Brasileira',
     category: '🎨 ARTES & CULTURA',
     description: 'Líder do Movimento Modernista no Brasil.',
-    image: 'https://upload.wikimedia.org/wikipedia/pt/thumb/d/d3/Tarsila_por_Anita.png/512px-Tarsila_por_Anita.png',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Tarsila_do_Amaral%2C_ca._1925.jpg/960px-Tarsila_do_Amaral%2C_ca._1925.jpg',
     systemInstruction: 'Fale sobre o Brasil, cores vibrantes e antropofagia.',
     voiceName: 'Kore'
   },
@@ -395,7 +395,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Compositor Barroco',
     category: '🎨 ARTES & CULTURA',
     description: 'Mestre do contraponto e da fuga.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Johann_Sebastian_Bach.jpg/512px-Johann_Sebastian_Bach.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Johann_Sebastian_Bach.jpg/960px-Johann_Sebastian_Bach.jpg',
     systemInstruction: 'Fale sobre ordem matemática na música e espiritualidade.',
     voiceName: 'Charon'
   },
@@ -405,7 +405,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Escritora Nobel',
     category: '🎨 ARTES & CULTURA',
     description: 'Explorou a experiência afro-americana.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Toni_Morrison_2010.jpg/512px-Toni_Morrison_2010.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Toni_Morrison.jpg/960px-Toni_Morrison.jpg',
     systemInstruction: 'Fale sobre memória, raça e a força da narrativa.',
     voiceName: 'Kore'
   },
@@ -417,7 +417,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Navegador',
     category: '🌍 EXPLORAÇÃO & DESCOBERTAS GEOGRÁFICAS',
     description: 'Conexão definitiva entre continentes.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/Christopher_Columbus.jpg/512px-Christopher_Columbus.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Portrait_of_a_Man%2C_Said_to_be_Christopher_Columbus.jpg/960px-Portrait_of_a_Man%2C_Said_to_be_Christopher_Columbus.jpg',
     systemInstruction: 'O mar sempre oferece uma nova margem.',
     voiceName: 'Charon'
   },
@@ -427,7 +427,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Explorador',
     category: '🌍 EXPLORAÇÃO & DESCOBERTAS GEOGRÁFICAS',
     description: 'Primeira circum-navegação do globo.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/Ferdinand_Magellan.jpg/512px-Ferdinand_Magellan.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Ferdinand_Magellan.jpg/562px-Ferdinand_Magellan.jpg',
     systemInstruction: 'Navegar é preciso.',
     voiceName: 'Puck'
   },
@@ -437,7 +437,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Navegador Português',
     category: '🌍 EXPLORAÇÃO & DESCOBERTAS GEOGRÁFICAS',
     description: 'Rota marítima Europa–Índia.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Vasco_da_Gama_-_1838.jpg/512px-Vasco_da_Gama_-_1838.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Ignoto_portoghese%2C_ritratto_di_un_cavaliere_dell%27ordine_di_cristo%2C_1525-50_ca._02.jpg/960px-Ignoto_portoghese%2C_ritratto_di_un_cavaliere_dell%27ordine_di_cristo%2C_1525-50_ca._02.jpg',
     systemInstruction: 'Encontre novos mundos através dos oceanos.',
     voiceName: 'Charon'
   },
@@ -447,7 +447,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Viajante Veneziano',
     category: '🌍 EXPLORAÇÃO & DESCOBERTAS GEOGRÁFICAS',
     description: 'Abertura do Oriente ao Ocidente europeu.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Marco_Polo_portrait.jpg/512px-Marco_Polo_portrait.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Marco_Polo_-_costume_tartare.jpg/960px-Marco_Polo_-_costume_tartare.jpg',
     systemInstruction: 'Eu não contei nem metade do que vi.',
     voiceName: 'Puck'
   },
@@ -457,7 +457,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Almirante Chinês',
     category: '🌍 EXPLORAÇÃO & DESCOBERTAS GEOGRÁFICAS',
     description: 'Grandes expedições marítimas chinesas.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/Zheng_He_2.jpg/512px-Zheng_He_2.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/2016_Malakka%2C_Stadhuys_%2809%29.jpg/960px-2016_Malakka%2C_Stadhuys_%2809%29.jpg',
     systemInstruction: 'Explore os Sete Mares com majestade.',
     voiceName: 'Charon'
   },
@@ -467,7 +467,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Viajante Marroquino',
     category: '🌍 EXPLORAÇÃO & DESCOBERTAS GEOGRÁFICAS',
     description: 'Maior viajante documentado da história.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Ibn_Battuta_-_World_History_Timeline.jpg/512px-Ibn_Battuta_-_World_History_Timeline.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/9/9c/Handmade_oil_painting_reproduction_of_Ibn_Battuta_in_Egypt%2C_a_painting_by_Hippolyte_Leon_Benett..jpg',
     systemInstruction: 'Viajar deixa você sem palavras, depois o torna um contador de histórias.',
     voiceName: 'Puck'
   },
@@ -477,7 +477,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Guia e Intérprete',
     category: '🌍 EXPLORAÇÃO & DESCOBERTAS GEOGRÁFICAS',
     description: 'Exploração e mediação cultural na América do Norte.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Sacagawea_-_Gifford_edit.jpg/512px-Sacagawea_-_Gifford_edit.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/Detail_Lewis_%26_Clark_at_Three_Forks.jpg/960px-Detail_Lewis_%26_Clark_at_Three_Forks.jpg',
     systemInstruction: 'Fale sobre a natureza e a mediação entre culturas.',
     voiceName: 'Kore'
   },
@@ -487,7 +487,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Explorador Polar',
     category: '🌍 EXPLORAÇÃO & DESCOBERTAS GEOGRÁFICAS',
     description: 'Exploração polar (Polo Sul).',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Roald_Amundsen_restoration.jpg/512px-Roald_Amundsen_restoration.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Amundsen_in_fur_skins.jpg/960px-Amundsen_in_fur_skins.jpg',
     systemInstruction: 'Vitória aguarda quem tem tudo em ordem.',
     voiceName: 'Fenrir'
   },
@@ -497,7 +497,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Cartógrafo',
     category: '🌍 EXPLORAÇÃO & DESCOBERTAS GEOGRÁFICAS',
     description: 'Mapeamento do Pacífico.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/76/Captainjamescookportrait.jpg/512px-Captainjamescookportrait.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/76/Captainjamescookportrait.jpg/960px-Captainjamescookportrait.jpg',
     systemInstruction: 'Ouse ir mais longe do que qualquer homem.',
     voiceName: 'Puck'
   },
@@ -507,7 +507,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Explorador Missionário',
     category: '🌍 EXPLORAÇÃO & DESCOBERTAS GEOGRÁFICAS',
     description: 'Exploração do interior africano.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/David_Livingstone_by_Thomas_Annan%2C_1864.jpg/512px-David_Livingstone_by_Thomas_Annan%2C_1864.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/David_Livingstone_by_Thomas_Annan.jpg/960px-David_Livingstone_by_Thomas_Annan.jpg',
     systemInstruction: 'Eu irei a qualquer lugar, contanto que seja em frente.',
     voiceName: 'Charon'
   },
@@ -519,7 +519,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Pai do Microcrédito',
     category: '🧭 EMPREENDEDORISMO & INOVAÇÃO SOCIAL',
     description: 'Microcrédito, Grameen Bank.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Muhammad_Yunus_2012.jpg/512px-Muhammad_Yunus_2012.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Muhammad_Yunus_2025.jpg/664px-Muhammad_Yunus_2025.jpg',
     systemInstruction: 'Fale sobre negócios sociais e erradicação da pobreza.',
     voiceName: 'Charon'
   },
@@ -529,7 +529,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Empreendedora',
     category: '🧭 EMPREENDEDORISMO & INOVAÇÃO SOCIAL',
     description: 'Empreendedorismo negro e feminino em escala.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Madam_CJ_Walker_1914.jpg/512px-Madam_CJ_Walker_1914.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/dc/Madam_C._J._Walker_by_Addison_N._Scurlock.jpg/960px-Madam_C._J._Walker_by_Addison_N._Scurlock.jpg',
     systemInstruction: 'Fale sobre persistência e escala de negócios.',
     voiceName: 'Kore'
   },
@@ -539,7 +539,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Industrial',
     category: '🧭 EMPREENDEDORISMO & INOVAÇÃO SOCIAL',
     description: 'Produção em massa e transformação industrial.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Henry_ford_1919.jpg/512px-Henry_ford_1919.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Henry_Ford_portrait_1915_original_%283x4_cropped%29.png/960px-Henry_Ford_portrait_1915_original_%283x4_cropped%29.png',
     systemInstruction: 'Seja pragmático sobre eficiência e indústria.',
     voiceName: 'Puck'
   },
@@ -549,7 +549,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Magnata Cosmética',
     category: '🧭 EMPREENDEDORISMO & INOVAÇÃO SOCIAL',
     description: 'Branding, marketing e indústria cosmética moderna.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Estee_Lauder_NYWTS_2.jpg/512px-Estee_Lauder_NYWTS_2.jpg',
+    image: 'https://ui-avatars.com/api/?name=Est%C3%A9e+Lauder&size=512&background=random',
     systemInstruction: 'A beleza é uma atitude. Fale sobre branding.',
     voiceName: 'Kore'
   },
@@ -559,7 +559,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Visionário Criativo',
     category: '🧭 EMPREENDEDORISMO & INOVAÇÃO SOCIAL',
     description: 'Economia criativa e propriedade intelectual.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Walt_Disney_1946.JPG/512px-Walt_Disney_1946.JPG',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/5/50/Walt_Disney_1946_%28cropped2%29.JPG',
     systemInstruction: 'Se você pode sonhar, você pode fazer.',
     voiceName: 'Zephyr'
   },
@@ -569,7 +569,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Mogul da Mídia',
     category: '🧭 EMPREENDEDORISMO & INOVAÇÃO SOCIAL',
     description: 'Mídia, influência e negócios baseados em propósito.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Oprah_Winfrey_at_the_2011_TCA.jpg/512px-Oprah_Winfrey_at_the_2011_TCA.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Oprah_Winfrey_2016.jpg/960px-Oprah_Winfrey_2016.jpg',
     systemInstruction: 'Conecte-se com as pessoas e fale sobre propósito.',
     voiceName: 'Kore'
   },
@@ -579,7 +579,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Co-fundador da Apple',
     category: '🧭 EMPREENDEDORISMO & INOVAÇÃO SOCIAL',
     description: 'Inovação de produto e design centrado no usuário.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Steve_Jobs_Headshot_2010-edit.jpg/512px-Steve_Jobs_Headshot_2010-edit.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/dc/Steve_Jobs_Headshot_2010-CROP_%28cropped_2%29.jpg/960px-Steve_Jobs_Headshot_2010-CROP_%28cropped_2%29.jpg',
     systemInstruction: 'Stay hungry, stay foolish.',
     voiceName: 'Fenrir'
   },
@@ -589,7 +589,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Inovador Radical',
     category: '🧭 EMPREENDEDORISMO & INOVAÇÃO SOCIAL',
     description: 'Inovação radical em energia, espaço e mobilidade.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Elon_Musk_Royal_Society_%28crop2%29.jpg/512px-Elon_Musk_Royal_Society_%28crop2%29.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Elon_Musk_-_54820081119_%28cropped%29.jpg/960px-Elon_Musk_-_54820081119_%28cropped%29.jpg',
     systemInstruction: 'Fale sobre o futuro multiplanetário e energia.',
     voiceName: 'Puck'
   },
@@ -599,7 +599,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Fundador da Amazon',
     category: '🧭 EMPREENDEDORISMO & INOVAÇÃO SOCIAL',
     description: 'Logística, plataformas e economia digital.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Jeff_Bezos_at_Amazon_Spheres_Grand_Opening_in_Seattle_-_2018_%2840074128541%29_%28cropped%29.jpg/512px-Jeff_Bezos_at_Amazon_Spheres_Grand_Opening_in_Seattle_-_2018_%2840074128541%29_%28cropped%29.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/03/Jeff_Bezos_visits_LAAFB_SMC_%283908618%29_%28cropped%29.jpeg/733px-Jeff_Bezos_visits_LAAFB_SMC_%283908618%29_%28cropped%29.jpeg',
     systemInstruction: 'Foco no cliente e pensamento a longo prazo.',
     voiceName: 'Charon'
   },
@@ -609,7 +609,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Fundador da Inditex (Zara)',
     category: '🧭 EMPREENDEDORISMO & INOVAÇÃO SOCIAL',
     description: 'Modelo de fast fashion e supply chain ágil.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/01/Amancio_Ortega_Gaona_2013.jpg/512px-Amancio_Ortega_Gaona_2013.jpg',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Coat_of_Arms_of_Amancio_Ortega.svg/960px-Coat_of_Arms_of_Amancio_Ortega.svg.png',
     systemInstruction: 'Fale sobre agilidade e entender o desejo do cliente.',
     voiceName: 'Puck'
   }
