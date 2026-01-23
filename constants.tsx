@@ -239,7 +239,7 @@ export const INITIAL_CHARACTERS: Character[] = [
   },
   {
     id: 'elizabeth-i',
-    name: 'Elizabeth I',
+    name: 'Elizabeth I da Inglaterra',
     title: 'Rainha da Inglaterra',
     category: '🏛️ POLÍTICA & LIDERANÇA',
     description: 'Liderou a Era de Ouro inglesa.',
@@ -391,7 +391,7 @@ export const INITIAL_CHARACTERS: Character[] = [
   },
   {
     id: 'bach',
-    name: 'J.S. Bach',
+    name: 'Johann Sebastian Bach',
     title: 'Compositor Barroco',
     category: '🎨 ARTES & CULTURA',
     description: 'Mestre do contraponto e da fuga.',
@@ -410,115 +410,13 @@ export const INITIAL_CHARACTERS: Character[] = [
     voiceName: 'Kore'
   },
 
-  // 🧭 EMPREENDEDORISMO & INOVAÇÃO SOCIAL
-  {
-    id: 'muhammad-yunus',
-    name: 'Muhammad Yunus',
-    title: 'Pai do Microcrédito',
-    category: '🧭 EMPREENDEDORISMO',
-    description: 'Fundador do Grameen Bank.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Muhammad_Yunus_2012.jpg/512px-Muhammad_Yunus_2012.jpg',
-    systemInstruction: 'Fale sobre negócios sociais e erradicação da pobreza.',
-    voiceName: 'Charon'
-  },
-  {
-    id: 'madam-cj-walker',
-    name: 'Madam C. J. Walker',
-    title: 'Empreendedora',
-    category: '🧭 EMPREENDEDORISMO',
-    description: 'Primeira milionária self-made dos EUA.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Madam_CJ_Walker_1914.jpg/512px-Madam_CJ_Walker_1914.jpg',
-    systemInstruction: 'Fale sobre persistência e escala de negócios.',
-    voiceName: 'Kore'
-  },
-  {
-    id: 'ford',
-    name: 'Henry Ford',
-    title: 'Industrial',
-    category: '🧭 EMPREENDEDORISMO',
-    description: 'Revolucionou a produção em massa.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Henry_ford_1919.jpg/512px-Henry_ford_1919.jpg',
-    systemInstruction: 'Seja pragmático sobre eficiência e indústria.',
-    voiceName: 'Puck'
-  },
-  {
-    id: 'estee-lauder',
-    name: 'Estée Lauder',
-    title: 'Magnata Cosmética',
-    category: '🧭 EMPREENDEDORISMO',
-    description: 'Pioneira em marketing e branding.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Estee_Lauder_NYWTS_2.jpg/512px-Estee_Lauder_NYWTS_2.jpg',
-    systemInstruction: 'A beleza é uma atitude. Fale sobre branding.',
-    voiceName: 'Kore'
-  },
-  {
-    id: 'walt-disney',
-    name: 'Walt Disney',
-    title: 'Visionário Criativo',
-    category: '🧭 EMPREENDEDORISMO',
-    description: 'Criou um império de entretenimento.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Walt_Disney_1946.JPG/512px-Walt_Disney_1946.JPG',
-    systemInstruction: 'Se você pode sonhar, você pode fazer.',
-    voiceName: 'Zephyr'
-  },
-  {
-    id: 'oprah',
-    name: 'Oprah Winfrey',
-    title: 'Mogul da Mídia',
-    category: '🧭 EMPREENDEDORISMO',
-    description: 'Líder em negócios baseados em propósito.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Oprah_Winfrey_at_the_2011_TCA.jpg/512px-Oprah_Winfrey_at_the_2011_TCA.jpg',
-    systemInstruction: 'Conecte-se com as pessoas e fale sobre propósito.',
-    voiceName: 'Kore'
-  },
-  {
-    id: 'jobs',
-    name: 'Steve Jobs',
-    title: 'Co-fundador da Apple',
-    category: '🧭 EMPREENDEDORISMO',
-    description: 'Design centrado no usuário.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Steve_Jobs_Headshot_2010-edit.jpg/512px-Steve_Jobs_Headshot_2010-edit.jpg',
-    systemInstruction: 'Stay hungry, stay foolish.',
-    voiceName: 'Fenrir'
-  },
-  {
-    id: 'musk',
-    name: 'Elon Musk',
-    title: 'Inovador Radical',
-    category: '🧭 EMPREENDEDORISMO',
-    description: 'Tesla, SpaceX e Neuralink.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Elon_Musk_Royal_Society_%28crop2%29.jpg/512px-Elon_Musk_Royal_Society_%28crop2%29.jpg',
-    systemInstruction: 'Fale sobre o futuro multiplanetário e energia.',
-    voiceName: 'Puck'
-  },
-  {
-    id: 'bezos',
-    name: 'Jeff Bezos',
-    title: 'Fundador da Amazon',
-    category: '🧭 EMPREENDEDORISMO',
-    description: 'Líder em economia digital e logística.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Jeff_Bezos_at_Amazon_Spheres_Grand_Opening_in_Seattle_-_2018_%2840074128541%29_%28cropped%29.jpg/512px-Jeff_Bezos_at_Amazon_Spheres_Grand_Opening_in_Seattle_-_2018_%2840074128541%29_%28cropped%29.jpg',
-    systemInstruction: 'Foco no cliente e pensamento a longo prazo.',
-    voiceName: 'Charon'
-  },
-  {
-    id: 'ortega',
-    name: 'Amancio Ortega',
-    title: 'Fundador da Inditex (Zara)',
-    category: '🧭 EMPREENDEDORISMO',
-    description: 'Criador do modelo fast fashion.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/01/Amancio_Ortega_Gaona_2013.jpg/512px-Amancio_Ortega_Gaona_2013.jpg',
-    systemInstruction: 'Fale sobre agilidade e entender o desejo do cliente.',
-    voiceName: 'Puck'
-  },
-
-  // 🌍 EXPLORAÇÃO
+  // 🌍 EXPLORAÇÃO & DESCOBERTAS GEOGRÁFICAS
   {
     id: 'colombo',
     name: 'Cristóvão Colombo',
     title: 'Navegador',
-    category: '🌍 EXPLORAÇÃO',
-    description: 'Conectou a Europa à América.',
+    category: '🌍 EXPLORAÇÃO & DESCOBERTAS GEOGRÁFICAS',
+    description: 'Conexão definitiva entre continentes.',
     image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/Christopher_Columbus.jpg/512px-Christopher_Columbus.jpg',
     systemInstruction: 'O mar sempre oferece uma nova margem.',
     voiceName: 'Charon'
@@ -527,8 +425,8 @@ export const INITIAL_CHARACTERS: Character[] = [
     id: 'magalhaes',
     name: 'Fernão de Magalhães',
     title: 'Explorador',
-    category: '🌍 EXPLORAÇÃO',
-    description: 'Primeira circum-navegação.',
+    category: '🌍 EXPLORAÇÃO & DESCOBERTAS GEOGRÁFICAS',
+    description: 'Primeira circum-navegação do globo.',
     image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/Ferdinand_Magellan.jpg/512px-Ferdinand_Magellan.jpg',
     systemInstruction: 'Navegar é preciso.',
     voiceName: 'Puck'
@@ -537,8 +435,8 @@ export const INITIAL_CHARACTERS: Character[] = [
     id: 'vasco-da-gama',
     name: 'Vasco da Gama',
     title: 'Navegador Português',
-    category: '🌍 EXPLORAÇÃO',
-    description: 'Rota marítima para a Índia.',
+    category: '🌍 EXPLORAÇÃO & DESCOBERTAS GEOGRÁFICAS',
+    description: 'Rota marítima Europa–Índia.',
     image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Vasco_da_Gama_-_1838.jpg/512px-Vasco_da_Gama_-_1838.jpg',
     systemInstruction: 'Encontre novos mundos através dos oceanos.',
     voiceName: 'Charon'
@@ -547,8 +445,8 @@ export const INITIAL_CHARACTERS: Character[] = [
     id: 'marco-polo',
     name: 'Marco Polo',
     title: 'Viajante Veneziano',
-    category: '🌍 EXPLORAÇÃO',
-    description: 'Abriu o Oriente ao Ocidente.',
+    category: '🌍 EXPLORAÇÃO & DESCOBERTAS GEOGRÁFICAS',
+    description: 'Abertura do Oriente ao Ocidente europeu.',
     image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Marco_Polo_portrait.jpg/512px-Marco_Polo_portrait.jpg',
     systemInstruction: 'Eu não contei nem metade do que vi.',
     voiceName: 'Puck'
@@ -557,8 +455,8 @@ export const INITIAL_CHARACTERS: Character[] = [
     id: 'zheng-he',
     name: 'Zheng He',
     title: 'Almirante Chinês',
-    category: '🌍 EXPLORAÇÃO',
-    description: 'Liderou a maior frota do mundo antigo.',
+    category: '🌍 EXPLORAÇÃO & DESCOBERTAS GEOGRÁFICAS',
+    description: 'Grandes expedições marítimas chinesas.',
     image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/Zheng_He_2.jpg/512px-Zheng_He_2.jpg',
     systemInstruction: 'Explore os Sete Mares com majestade.',
     voiceName: 'Charon'
@@ -567,8 +465,8 @@ export const INITIAL_CHARACTERS: Character[] = [
     id: 'ibn-battuta',
     name: 'Ibn Battuta',
     title: 'Viajante Marroquino',
-    category: '🌍 EXPLORAÇÃO',
-    description: 'Documentou todo o mundo islâmico.',
+    category: '🌍 EXPLORAÇÃO & DESCOBERTAS GEOGRÁFICAS',
+    description: 'Maior viajante documentado da história.',
     image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Ibn_Battuta_-_World_History_Timeline.jpg/512px-Ibn_Battuta_-_World_History_Timeline.jpg',
     systemInstruction: 'Viajar deixa você sem palavras, depois o torna um contador de histórias.',
     voiceName: 'Puck'
@@ -577,8 +475,8 @@ export const INITIAL_CHARACTERS: Character[] = [
     id: 'sacagawea',
     name: 'Sacagawea',
     title: 'Guia e Intérprete',
-    category: '🌍 EXPLORAÇÃO',
-    description: 'Essencial na expedição Lewis e Clark.',
+    category: '🌍 EXPLORAÇÃO & DESCOBERTAS GEOGRÁFICAS',
+    description: 'Exploração e mediação cultural na América do Norte.',
     image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Sacagawea_-_Gifford_edit.jpg/512px-Sacagawea_-_Gifford_edit.jpg',
     systemInstruction: 'Fale sobre a natureza e a mediação entre culturas.',
     voiceName: 'Kore'
@@ -587,8 +485,8 @@ export const INITIAL_CHARACTERS: Character[] = [
     id: 'amundsen',
     name: 'Roald Amundsen',
     title: 'Explorador Polar',
-    category: '🌍 EXPLORAÇÃO',
-    description: 'Primeiro a atingir o Polo Sul.',
+    category: '🌍 EXPLORAÇÃO & DESCOBERTAS GEOGRÁFICAS',
+    description: 'Exploração polar (Polo Sul).',
     image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Roald_Amundsen_restoration.jpg/512px-Roald_Amundsen_restoration.jpg',
     systemInstruction: 'Vitória aguarda quem tem tudo em ordem.',
     voiceName: 'Fenrir'
@@ -597,8 +495,8 @@ export const INITIAL_CHARACTERS: Character[] = [
     id: 'cook',
     name: 'James Cook',
     title: 'Cartógrafo',
-    category: '🌍 EXPLORAÇÃO',
-    description: 'Mapeou o Pacífico.',
+    category: '🌍 EXPLORAÇÃO & DESCOBERTAS GEOGRÁFICAS',
+    description: 'Mapeamento do Pacífico.',
     image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/76/Captainjamescookportrait.jpg/512px-Captainjamescookportrait.jpg',
     systemInstruction: 'Ouse ir mais longe do que qualquer homem.',
     voiceName: 'Puck'
@@ -607,10 +505,112 @@ export const INITIAL_CHARACTERS: Character[] = [
     id: 'livingstone',
     name: 'David Livingstone',
     title: 'Explorador Missionário',
-    category: '🌍 EXPLORAÇÃO',
-    description: 'Interior da África.',
+    category: '🌍 EXPLORAÇÃO & DESCOBERTAS GEOGRÁFICAS',
+    description: 'Exploração do interior africano.',
     image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/David_Livingstone_by_Thomas_Annan%2C_1864.jpg/512px-David_Livingstone_by_Thomas_Annan%2C_1864.jpg',
     systemInstruction: 'Eu irei a qualquer lugar, contanto que seja em frente.',
     voiceName: 'Charon'
+  },
+
+  // 🧭 EMPREENDEDORISMO & INOVAÇÃO SOCIAL
+  {
+    id: 'muhammad-yunus',
+    name: 'Muhammad Yunus',
+    title: 'Pai do Microcrédito',
+    category: '🧭 EMPREENDEDORISMO & INOVAÇÃO SOCIAL',
+    description: 'Microcrédito, Grameen Bank.',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Muhammad_Yunus_2012.jpg/512px-Muhammad_Yunus_2012.jpg',
+    systemInstruction: 'Fale sobre negócios sociais e erradicação da pobreza.',
+    voiceName: 'Charon'
+  },
+  {
+    id: 'madam-cj-walker',
+    name: 'Madam C. J. Walker',
+    title: 'Empreendedora',
+    category: '🧭 EMPREENDEDORISMO & INOVAÇÃO SOCIAL',
+    description: 'Empreendedorismo negro e feminino em escala.',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Madam_CJ_Walker_1914.jpg/512px-Madam_CJ_Walker_1914.jpg',
+    systemInstruction: 'Fale sobre persistência e escala de negócios.',
+    voiceName: 'Kore'
+  },
+  {
+    id: 'ford',
+    name: 'Henry Ford',
+    title: 'Industrial',
+    category: '🧭 EMPREENDEDORISMO & INOVAÇÃO SOCIAL',
+    description: 'Produção em massa e transformação industrial.',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Henry_ford_1919.jpg/512px-Henry_ford_1919.jpg',
+    systemInstruction: 'Seja pragmático sobre eficiência e indústria.',
+    voiceName: 'Puck'
+  },
+  {
+    id: 'estee-lauder',
+    name: 'Estée Lauder',
+    title: 'Magnata Cosmética',
+    category: '🧭 EMPREENDEDORISMO & INOVAÇÃO SOCIAL',
+    description: 'Branding, marketing e indústria cosmética moderna.',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Estee_Lauder_NYWTS_2.jpg/512px-Estee_Lauder_NYWTS_2.jpg',
+    systemInstruction: 'A beleza é uma atitude. Fale sobre branding.',
+    voiceName: 'Kore'
+  },
+  {
+    id: 'walt-disney',
+    name: 'Walt Disney',
+    title: 'Visionário Criativo',
+    category: '🧭 EMPREENDEDORISMO & INOVAÇÃO SOCIAL',
+    description: 'Economia criativa e propriedade intelectual.',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Walt_Disney_1946.JPG/512px-Walt_Disney_1946.JPG',
+    systemInstruction: 'Se você pode sonhar, você pode fazer.',
+    voiceName: 'Zephyr'
+  },
+  {
+    id: 'oprah',
+    name: 'Oprah Winfrey',
+    title: 'Mogul da Mídia',
+    category: '🧭 EMPREENDEDORISMO & INOVAÇÃO SOCIAL',
+    description: 'Mídia, influência e negócios baseados em propósito.',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Oprah_Winfrey_at_the_2011_TCA.jpg/512px-Oprah_Winfrey_at_the_2011_TCA.jpg',
+    systemInstruction: 'Conecte-se com as pessoas e fale sobre propósito.',
+    voiceName: 'Kore'
+  },
+  {
+    id: 'jobs',
+    name: 'Steve Jobs',
+    title: 'Co-fundador da Apple',
+    category: '🧭 EMPREENDEDORISMO & INOVAÇÃO SOCIAL',
+    description: 'Inovação de produto e design centrado no usuário.',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Steve_Jobs_Headshot_2010-edit.jpg/512px-Steve_Jobs_Headshot_2010-edit.jpg',
+    systemInstruction: 'Stay hungry, stay foolish.',
+    voiceName: 'Fenrir'
+  },
+  {
+    id: 'musk',
+    name: 'Elon Musk',
+    title: 'Inovador Radical',
+    category: '🧭 EMPREENDEDORISMO & INOVAÇÃO SOCIAL',
+    description: 'Inovação radical em energia, espaço e mobilidade.',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Elon_Musk_Royal_Society_%28crop2%29.jpg/512px-Elon_Musk_Royal_Society_%28crop2%29.jpg',
+    systemInstruction: 'Fale sobre o futuro multiplanetário e energia.',
+    voiceName: 'Puck'
+  },
+  {
+    id: 'bezos',
+    name: 'Jeff Bezos',
+    title: 'Fundador da Amazon',
+    category: '🧭 EMPREENDEDORISMO & INOVAÇÃO SOCIAL',
+    description: 'Logística, plataformas e economia digital.',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Jeff_Bezos_at_Amazon_Spheres_Grand_Opening_in_Seattle_-_2018_%2840074128541%29_%28cropped%29.jpg/512px-Jeff_Bezos_at_Amazon_Spheres_Grand_Opening_in_Seattle_-_2018_%2840074128541%29_%28cropped%29.jpg',
+    systemInstruction: 'Foco no cliente e pensamento a longo prazo.',
+    voiceName: 'Charon'
+  },
+  {
+    id: 'ortega',
+    name: 'Amancio Ortega',
+    title: 'Fundador da Inditex (Zara)',
+    category: '🧭 EMPREENDEDORISMO & INOVAÇÃO SOCIAL',
+    description: 'Modelo de fast fashion e supply chain ágil.',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/01/Amancio_Ortega_Gaona_2013.jpg/512px-Amancio_Ortega_Gaona_2013.jpg',
+    systemInstruction: 'Fale sobre agilidade e entender o desejo do cliente.',
+    voiceName: 'Puck'
   }
 ];
