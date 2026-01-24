@@ -4,6 +4,7 @@ import { CharacterProvider, useCharacters } from './contexts/CharacterContext';
 import CharacterCard from './components/CharacterCard';
 import LiveConversation from './components/LiveConversation';
 import AdminPanel from './components/AdminPanel';
+import Logo from './components/Logo';
 import { Settings } from 'lucide-react';
 
 const AppContent: React.FC = () => {
@@ -43,6 +44,11 @@ const AppContent: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white relative">
+      {/* Logo */}
+      <div className="absolute top-6 left-6 z-40">
+        <Logo />
+      </div>
+
       {/* Admin Toggle */}
       <button 
         onClick={() => setShowAdmin(true)}

@@ -4,6 +4,7 @@ import { Character } from '../types';
 import { getGeminiClient, encode, decode, decodeAudioData } from '../services/gemini';
 import { LiveServerMessage, Modality } from '@google/genai';
 import { X, Mic, MicOff, PhoneOff } from 'lucide-react';
+import Logo from './Logo';
 
 interface LiveConversationProps {
   character: Character;
@@ -186,6 +187,11 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
 
   return (
     <div className="fixed inset-0 bg-[#0a0a0a] z-50 flex flex-col items-center justify-between p-8">
+      {/* Logo */}
+      <div className="absolute top-6 left-6 z-50">
+        <Logo />
+      </div>
+
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col items-center justify-center w-full max-w-6xl">
         
