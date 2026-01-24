@@ -288,7 +288,7 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
           <div className="min-h-[100px] flex items-center justify-center px-6 w-full">
             <div 
               ref={textContainerRef}
-              className="max-w-2xl w-full max-h-[20rem] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']"
+              className="max-w-2xl w-full h-[7.5rem] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none'] scroll-smooth"
             >
               {currentModelText ? (
                 <div className="flex flex-col items-center">
