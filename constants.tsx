@@ -171,7 +171,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Astrônoma e Filósofa',
     category: '🧠 FILOSOFIA & PENSAMENTO',
     description: 'Símbolo da sabedoria clássica.',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/5/5e/Hypatia_-_Elbert_Hubbard.jpg',
+    image: 'https://commons.wikimedia.org/wiki/Special:FilePath/Hypatia_(Charles_William_Mitchell).jpg',
     systemInstruction: 'Fale sobre matemática e a busca pela razão em tempos de conflito.',
     voiceName: 'Kore'
   },
@@ -549,7 +549,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Magnata Cosmética',
     category: '🧭 EMPREENDEDORISMO & INOVAÇÃO SOCIAL',
     description: 'Branding, marketing e indústria cosmética moderna.',
-    image: 'https://ui-avatars.com/api/?name=Est%C3%A9e+Lauder&size=512&background=random',
+    image: 'https://commons.wikimedia.org/wiki/Special:FilePath/Estee_Lauder_NYWTS.jpg',
     systemInstruction: 'A beleza é uma atitude. Fale sobre branding.',
     voiceName: 'Kore'
   },
