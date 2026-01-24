@@ -57,11 +57,11 @@ const AppContent: React.FC = () => {
       {/* Hero Section */}
       <div className="max-w-6xl mx-auto pt-16 px-6 text-center">
         <header className="mb-12">
-          <h1 className="text-4xl md:text-6xl font-sci font-black mb-6 gradient-text uppercase tracking-widest drop-shadow-[0_0_20px_rgba(168,85,247,0.4)]">
+          <h1 className="text-[2.5rem] md:text-[4.125rem] font-sci font-black mb-6 gradient-text uppercase tracking-widest drop-shadow-[0_0_20px_rgba(168,85,247,0.4)]">
             MÁQUINA DO TEMPO
           </h1>
           <p className="text-slate-400 text-base md:text-lg max-w-xl mx-auto font-light leading-relaxed">
-            Explore nossa curadoria de figuras históricas e mentes brilhantes preparadas para conversar com você em tempo real por voz.
+            Converse com qualquer figura histórica e mentes brilhantes com você em tempo real por voz.
           </p>
         </header>
 
