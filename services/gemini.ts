@@ -38,6 +38,31 @@ export const generateCharacterProfile = async (query: string): Promise<Character
   };
 };
 
+export const generateImage = async (prompt: string): Promise<string | null> => {
+  try {
+    const ai = getGeminiClient();
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash-image', // Nano Banana model
+      contents: prompt,
+      config: {
+        responseMimeType: 'image/jpeg'
+      }
+    });
+    
+    // Check for inline data (base64)
+    const candidates = response.candidates;
+    if (candidates && candidates[0]?.content?.parts?.[0]?.inlineData) {
+      const inlineData = candidates[0].content.parts[0].inlineData;
+      return `data:${inlineData.mimeType};base64,${inlineData.data}`;
+    }
+    
+    return null;
+  } catch (error) {
+    console.error('Error generating image:', error);
+    return null;
+  }
+};
+
 // Audio Helpers - Implementing manually following the provided examples to avoid external library issues
 export function encode(bytes: Uint8Array): string {
   let binary = '';

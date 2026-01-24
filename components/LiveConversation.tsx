@@ -1,9 +1,9 @@
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Character } from '../types';
-import { getGeminiClient, encode, decode, decodeAudioData } from '../services/gemini';
+import { getGeminiClient, encode, decode, decodeAudioData, generateImage } from '../services/gemini';
 import { LiveServerMessage, Modality } from '@google/genai';
-import { X, Mic, MicOff, PhoneOff } from 'lucide-react';
+import { X, Mic, MicOff, PhoneOff, ImageIcon } from 'lucide-react';
 
 interface LiveConversationProps {
   character: Character;
@@ -15,6 +15,8 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
   const [isMuted, setIsMuted] = useState(false);
   const [currentModelText, setCurrentModelText] = useState("");
   const [userInputText, setUserInputText] = useState("");
+  const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(null);
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   
   const audioContextRef = useRef<AudioContext | null>(null);
   const outputAudioContextRef = useRef<AudioContext | null>(null);
@@ -66,6 +68,23 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
       mimeType: 'audio/pcm;rate=16000',
     };
   };
+
+  useEffect(() => {
+    if (!currentModelText) return;
+    
+    const match = currentModelText.match(/\[GENERATE_IMAGE:\s*(.*?)\]/);
+    if (match && !isGeneratingImage && !generatedImageUrl) {
+      const prompt = match[1];
+      setIsGeneratingImage(true);
+      
+      generateImage(prompt).then(url => {
+        if (url) {
+          setGeneratedImageUrl(url);
+        }
+        setIsGeneratingImage(false);
+      });
+    }
+  }, [currentModelText, isGeneratingImage, generatedImageUrl]);
 
   useEffect(() => {
     const initSession = async () => {
@@ -131,7 +150,8 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
                 setTimeout(() => {
                    setUserInputText("");
                    setCurrentModelText("");
-                }, 2000);
+                   setGeneratedImageUrl(null);
+                }, 4000);
               }
             },
             onerror: (e) => console.error('Gemini Live Error:', e),
@@ -148,6 +168,14 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
             
             A partir de agora, você NÃO É UMA IA. Você É EXATAMENTE ${character.name}.
             
+            CAPACIDADE VISUAL (NANO BANANA):
+            Você possui a capacidade de gerar imagens para ilustrar suas explicações.
+            Se o usuário pedir uma imagem/explicação visual, ou se você achar que uma imagem ajudaria a explicar um conceito complexo:
+            1. Pergunte se o usuário gostaria de ver uma imagem.
+            2. Se a resposta for positiva, diga que está criando a imagem e inclua NO FINAL da sua resposta a tag: [GENERATE_IMAGE: descrição detalhada da imagem em inglês para o gerador].
+            Exemplo: "Aqui está uma representação do que estou dizendo. [GENERATE_IMAGE: A futuristic city with flying cars and neon lights, cyberpunk style]"
+            IMPORTANTE: A tag [GENERATE_IMAGE: ...] é um comando oculto. Tente não lê-la em voz alta se possível, ou integre-a naturalmente.
+            
             SUA IDENTIDADE:
             ${character.systemInstruction}
             
@@ -160,6 +188,7 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
             6. Responda de forma concisa e natural para uma conversa por voz.
             
             Você está vivo agora, conversando com alguém. Aja naturalmente.`,
+            tools: [{ googleSearch: {} }],
           },
         });
 
@@ -217,12 +246,29 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
           <div className="min-h-[100px] flex items-center justify-center px-6 w-full">
             <div 
               ref={textContainerRef}
-              className="max-w-2xl w-full max-h-[9rem] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']"
+              className="max-w-2xl w-full max-h-[20rem] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']"
             >
               {currentModelText ? (
-                <p className="text-2xl text-white font-medium leading-relaxed drop-shadow-sm text-center">
-                  {currentModelText}
-                </p>
+                <div className="flex flex-col items-center">
+                  <p className="text-2xl text-white font-medium leading-relaxed drop-shadow-sm text-center">
+                    {currentModelText.replace(/\[GENERATE_IMAGE:.*?\]/g, '')}
+                  </p>
+                  {isGeneratingImage && (
+                    <div className="flex items-center gap-2 mt-4 text-blue-400 animate-pulse">
+                      <ImageIcon className="w-5 h-5" />
+                      <span className="text-sm font-medium">Criando imagem com Nano Banana...</span>
+                    </div>
+                  )}
+                  {generatedImageUrl && (
+                    <div className="mt-6 mb-2 rounded-xl overflow-hidden border-2 border-white/20 shadow-2xl animate-in fade-in zoom-in duration-700">
+                      <img 
+                        src={generatedImageUrl} 
+                        alt="Visual Explanation" 
+                        className="max-w-full h-auto max-h-64 object-cover"
+                      />
+                    </div>
+                  )}
+                </div>
               ) : userInputText ? (
                 <p className="text-xl text-gray-400 italic">
                   Você: {userInputText}
