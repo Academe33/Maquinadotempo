@@ -91,7 +91,8 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
             onopen: () => {
               setIsConnected(true);
               const source = inputCtx.createMediaStreamSource(stream);
-              const scriptProcessor = inputCtx.createScriptProcessor(4096, 1, 1);
+              // Increased buffer size to 16384 to reduce potential input overflow
+              const scriptProcessor = inputCtx.createScriptProcessor(16384, 1, 1);
               processorRef.current = scriptProcessor;
 
               scriptProcessor.onaudioprocess = (e) => {
