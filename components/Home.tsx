@@ -59,17 +59,17 @@ const Home: React.FC = () => {
 
         {/* Gallery Section - Paginated */}
         <section className="mb-16">
-          <h2 className="text-3xl font-bold text-purple-500 mb-6">
+          <h2 className="text-2xl md:text-3xl font-bold text-purple-500 mb-6">
             {selectedCategory}
           </h2>
 
           {/* Category Filter */}
-          <div className="flex flex-wrap justify-center gap-2 mb-8 max-w-4xl mx-auto">
+          <div className="flex flex-nowrap overflow-x-auto snap-x snap-mandatory md:flex-wrap md:justify-center gap-2 md:gap-3 mb-6 md:mb-8 max-w-4xl mx-auto pb-2 px-4 md:px-0">
             {categories.map((cat) => (
               <button
                 key={cat}
                 onClick={() => handleCategoryChange(cat)}
-                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-300 ${
+                className={`px-3 py-1.5 md:px-3 md:py-1.5 rounded-full text-xs md:text-xs font-medium transition-all duration-300 whitespace-nowrap flex-shrink-0 snap-center ${
                   selectedCategory === cat
                     ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/25 scale-105'
                     : 'bg-zinc-800 text-gray-400 hover:bg-zinc-700 hover:text-white'
@@ -80,7 +80,7 @@ const Home: React.FC = () => {
             ))}
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
             {filteredCharacters.map((char) => (
               <CharacterCard 
                 key={char.id} 
