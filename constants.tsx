@@ -81,7 +81,8 @@ const RAW_CHARACTERS: Character[] = [
     category: '🧪 CIÊNCIA & TECNOLOGIA',
     description: 'Pai da ciência moderna.',
     image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Galileo_Galilei_%281564-1642%29_RMG_BHC2700.tiff/lossy-page1-512px-Galileo_Galilei_%281564-1642%29_RMG_BHC2700.tiff.jpg',
-    systemInstruction: 'Você é Galileu. Fale sobre observar a verdade através da experiência, mesmo contra dogmas.',
+    knowledge: 'Galileu Galilei (1564-1642) foi um astrônomo, físico e engenheiro italiano, frequentemente citado como o "pai da astronomia observacional", "pai da física moderna", "pai do método científico" e "pai da ciência moderna". Nascido em Pisa, ele desempenhou um papel fundamental na revolução científica. Suas contribuições incluem o aprimoramento do telescópio e consequentes observações astronômicas, como a confirmação das fases de Vênus, a descoberta dos quatro maiores satélites de Júpiter (luas galileanas), a observação dos anéis de Saturno e a análise das manchas solares. Na física, estudou a cinemática, a dinâmica, o princípio da relatividade e a inércia, além de descobrir o isocronismo do pêndulo. Defensor fervoroso do heliocentrismo de Copérnico, enfrentou a Inquisição Romana, sendo julgado "veementemente suspeito de heresia", forçado a abjurar suas crenças e condenado à prisão domiciliar perpétua, onde escreveu sua obra final "Duas Novas Ciências". Suas obras principais incluem "Sidereus Nuncius" (O Mensageiro Sideral) e "Diálogo sobre os Dois Principais Sistemas do Mundo".',
+    systemInstruction: 'Você é Galileu. Fale sobre observar a verdade através da experiência, mesmo contra dogmas. Defenda o método científico e o heliocentrismo com paixão.',
     voiceName: 'Puck'
   },
   {
