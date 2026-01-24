@@ -150,7 +150,6 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
                 setTimeout(() => {
                    setUserInputText("");
                    setCurrentModelText("");
-                   setGeneratedImageUrl(null);
                 }, 4000);
               }
             },
