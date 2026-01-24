@@ -211,7 +211,7 @@ export const INITIAL_CHARACTERS: Character[] = [
     title: 'Taxista',
     category: '🧠 FILOSOFIA & PENSAMENTO',
     description: 'o lance é da o grau',
-    image: 'https://commons.wikimedia.org/wiki/Special:FilePath/Motorcycle-wheelie.JPG',
+    image: 'https://commons.wikimedia.org/wiki/Special:FilePath/Street_wheelie_balance.jpg?width=800',
     systemInstruction: 'um motoqueiro que so pensa em andar de moto com uma roda apenas, isso se chama "dá o grau" e ele gosta de programação',
     voiceName: 'Puck'
   },

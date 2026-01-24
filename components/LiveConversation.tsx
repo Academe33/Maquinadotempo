@@ -216,31 +216,64 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col items-center justify-center w-full max-w-4xl">
-        <div className="relative mb-12">
-          {isConnected && !isMuted && (
-            <div className="absolute -inset-4 rounded-full border-4 border-blue-500/20 ring-animation"></div>
-          )}
-          <div className={`w-64 h-64 md:w-80 md:h-80 rounded-full overflow-hidden border-4 transition-all duration-700 shadow-2xl bg-[#151515] flex items-center justify-center ${isConnected ? 'border-blue-500 scale-105 shadow-blue-500/20' : 'border-white/10 grayscale opacity-40'}`}>
-            <img 
-              src={character.image} 
-              alt={character.name} 
-              referrerPolicy="no-referrer"
-              className="w-full h-full object-cover"
-              onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                target.src = character.image + "?retry=" + Date.now();
-              }}
-            />
+      <div className="flex-1 flex flex-col items-center justify-center w-full max-w-6xl">
+        
+        {/* Visuals Container */}
+        <div className="flex flex-col md:flex-row items-center justify-center gap-8 mb-8 md:mb-12 w-full transition-all duration-500">
+          
+          {/* Character Avatar */}
+          <div className="relative">
+            {isConnected && !isMuted && (
+              <div className="absolute -inset-4 rounded-full border-4 border-purple-500/20 ring-animation"></div>
+            )}
+            <div className={`w-64 h-64 md:w-80 md:h-80 rounded-full overflow-hidden border-4 transition-all duration-700 shadow-2xl bg-[#151515] flex items-center justify-center ${isConnected ? 'border-purple-500 scale-105 shadow-purple-500/20' : 'border-white/10 grayscale opacity-40'}`}>
+              <img 
+                src={character.image} 
+                alt={character.name} 
+                referrerPolicy="no-referrer"
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = character.image + "?retry=" + Date.now();
+                }}
+              />
+            </div>
+            {isConnected && (
+              <div className="absolute bottom-4 right-4 bg-green-500 w-6 h-6 rounded-full border-4 border-[#0a0a0a] animate-pulse shadow-lg"></div>
+            )}
           </div>
-          {isConnected && (
-            <div className="absolute bottom-4 right-4 bg-green-500 w-6 h-6 rounded-full border-4 border-[#0a0a0a] animate-pulse shadow-lg"></div>
+
+          {/* Generated Image Display */}
+          {(generatedImageUrl || isGeneratingImage) && (
+            <div className="relative animate-in fade-in slide-in-from-bottom-10 md:slide-in-from-left-10 duration-700 z-10">
+              <div className="w-64 h-64 md:w-80 md:h-80 rounded-2xl overflow-hidden border-4 border-purple-500/30 shadow-2xl shadow-purple-900/20 bg-[#151515] flex items-center justify-center relative group">
+                {isGeneratingImage ? (
+                  <div className="flex flex-col items-center gap-3 text-purple-400 animate-pulse p-6 text-center">
+                    <div className="p-4 bg-purple-500/10 rounded-full mb-2">
+                      <ImageIcon className="w-8 h-8" />
+                    </div>
+                    <span className="text-sm font-medium tracking-wide">MATERIALIZANDO VISUAL...</span>
+                  </div>
+                ) : (
+                  <>
+                    <img 
+                      src={generatedImageUrl!} 
+                      alt="Visual Explanation" 
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-4">
+                      <span className="text-white/80 text-xs uppercase tracking-widest font-medium">Nano Banana Vision</span>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
           )}
         </div>
         
-        <div className="text-center mb-12">
+        <div className="text-center mb-12 max-w-3xl w-full">
           <h2 className="text-4xl font-bold mb-3 tracking-tight">{character.name}</h2>
-          <p className="text-blue-400 font-medium tracking-wide uppercase text-sm mb-6">{character.title}</p>
+          <p className="text-purple-400 font-medium tracking-wide uppercase text-sm mb-6">{character.title}</p>
           
           {/* Subtitles Overlay */}
           <div className="min-h-[100px] flex items-center justify-center px-6 w-full">
@@ -253,21 +286,6 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
                   <p className="text-2xl text-white font-medium leading-relaxed drop-shadow-sm text-center">
                     {currentModelText.replace(/\[GENERATE_IMAGE:.*?\]/g, '')}
                   </p>
-                  {isGeneratingImage && (
-                    <div className="flex items-center gap-2 mt-4 text-blue-400 animate-pulse">
-                      <ImageIcon className="w-5 h-5" />
-                      <span className="text-sm font-medium">Criando imagem com Nano Banana...</span>
-                    </div>
-                  )}
-                  {generatedImageUrl && (
-                    <div className="mt-6 mb-2 rounded-xl overflow-hidden border-2 border-white/20 shadow-2xl animate-in fade-in zoom-in duration-700">
-                      <img 
-                        src={generatedImageUrl} 
-                        alt="Visual Explanation" 
-                        className="max-w-full h-auto max-h-64 object-cover"
-                      />
-                    </div>
-                  )}
                 </div>
               ) : userInputText ? (
                 <p className="text-xl text-gray-400 italic">

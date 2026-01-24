@@ -35,7 +35,7 @@ const CharacterCard: React.FC<CharacterCardProps> = ({ character, onClick }) => 
         </div>
       </div>
       <h3 className="text-lg font-bold mb-2 group-hover:text-primary transition-colors duration-300">{character.name}</h3>
-      <p className="text-blue-400/80 text-xs font-semibold uppercase tracking-wider mb-2">{character.title.split(',')[0]}</p>
+      <p className="text-purple-400/80 text-xs font-semibold uppercase tracking-wider mb-2">{character.title.split(',')[0]}</p>
       <p className="text-slate-400 text-xs leading-relaxed line-clamp-2 italic">
         "{character.description}"
       </p>

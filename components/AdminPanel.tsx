@@ -113,7 +113,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
               onClick={() => setSelectedCharId(null)}
               className={`w-full text-left px-4 py-3 rounded-lg text-sm transition-colors flex items-center gap-3 mb-2 border-2 border-dashed ${
                 selectedCharId === null
-                  ? 'bg-blue-500/10 text-blue-500 border-blue-500/50'
+                  ? 'bg-purple-500/10 text-purple-500 border-purple-500/50'
                   : 'border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:text-white'
               }`}
             >
@@ -126,10 +126,10 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
                 <button
                   key={char.id}
                   onClick={() => setSelectedCharId(char.id)}
-                  className={`w-full text-left px-4 py-3 rounded-lg text-sm transition-colors flex items-center gap-3 ${
-                    selectedCharId === char.id 
-                      ? 'bg-red-500/10 text-red-500 border border-red-500/20' 
-                      : 'hover:bg-zinc-800 text-zinc-400'
+                  className={`w-full text-left px-4 py-3 rounded-lg transition-colors flex items-center justify-between group border ${
+                    selectedCharId === char.id
+                    ? 'bg-purple-500/10 text-purple-500 border-purple-500/50'
+                    : 'text-zinc-400 hover:bg-white/5 border-transparent hover:border-white/10'
                   }`}
                 >
                   <img src={char.image} alt="" className="w-8 h-8 rounded-full object-cover" />
@@ -250,7 +250,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
 
               <button
                 onClick={handleSave}
-                className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+                className="flex items-center gap-2 px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors"
               >
                 <Save className="w-4 h-4" />
                 {isEditing ? 'Salvar Alterações' : 'Criar Personagem'}

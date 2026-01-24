@@ -67,7 +67,7 @@ const AppContent: React.FC = () => {
 
         {/* Gallery Section - Paginated */}
         <section className="mb-24">
-          <h2 className="text-4xl font-bold text-blue-500 mb-8">
+          <h2 className="text-4xl font-bold text-purple-500 mb-8">
             {selectedCategory}
           </h2>
 
@@ -79,7 +79,7 @@ const AppContent: React.FC = () => {
                 onClick={() => handleCategoryChange(cat)}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
                   selectedCategory === cat
-                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/25 scale-105'
+                    ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/25 scale-105'
                     : 'bg-zinc-800 text-gray-400 hover:bg-zinc-700 hover:text-white'
                 }`}
               >
