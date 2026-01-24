@@ -5,6 +5,8 @@ import { INITIAL_CHARACTERS } from '../constants';
 interface CharacterContextType {
   characters: Character[];
   updateCharacter: (id: string, updates: Partial<Character>) => void;
+  addCharacter: (character: Character) => void;
+  deleteCharacter: (id: string) => void;
   resetCharacters: () => void;
 }
 
@@ -19,12 +21,20 @@ export const CharacterProvider: React.FC<{ children: ReactNode }> = ({ children 
     ));
   };
 
+  const addCharacter = (character: Character) => {
+    setCharacters(prev => [...prev, character]);
+  };
+
+  const deleteCharacter = (id: string) => {
+    setCharacters(prev => prev.filter(char => char.id !== id));
+  };
+
   const resetCharacters = () => {
     setCharacters(INITIAL_CHARACTERS);
   };
 
   return (
-    <CharacterContext.Provider value={{ characters, updateCharacter, resetCharacters }}>
+    <CharacterContext.Provider value={{ characters, updateCharacter, addCharacter, deleteCharacter, resetCharacters }}>
       {children}
     </CharacterContext.Provider>
   );
