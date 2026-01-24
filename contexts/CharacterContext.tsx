@@ -11,14 +11,7 @@ interface CharacterContextType {
 const CharacterContext = createContext<CharacterContextType | undefined>(undefined);
 
 export const CharacterProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [characters, setCharacters] = useState<Character[]>(() => {
-    const saved = localStorage.getItem('characters');
-    return saved ? JSON.parse(saved) : INITIAL_CHARACTERS;
-  });
-
-  useEffect(() => {
-    localStorage.setItem('characters', JSON.stringify(characters));
-  }, [characters]);
+  const [characters, setCharacters] = useState<Character[]>(INITIAL_CHARACTERS);
 
   const updateCharacter = (id: string, updates: Partial<Character>) => {
     setCharacters(prev => prev.map(char => 
@@ -28,7 +21,6 @@ export const CharacterProvider: React.FC<{ children: ReactNode }> = ({ children 
 
   const resetCharacters = () => {
     setCharacters(INITIAL_CHARACTERS);
-    localStorage.removeItem('characters');
   };
 
   return (
