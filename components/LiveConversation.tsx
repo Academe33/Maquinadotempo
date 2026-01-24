@@ -17,7 +17,7 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
   const [userInputText, setUserInputText] = useState("");
   const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(null);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
-  const [generationError, setGenerationError] = useState<boolean>(false);
+  const [generationError, setGenerationError] = useState<string | null>(null);
   
   const audioContextRef = useRef<AudioContext | null>(null);
   const outputAudioContextRef = useRef<AudioContext | null>(null);
@@ -77,13 +77,13 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
     if (match && !isGeneratingImage && !generatedImageUrl && !generationError) {
       const prompt = match[1];
       setIsGeneratingImage(true);
-      setGenerationError(false);
+      setGenerationError(null);
       
-      generateImage(prompt).then(url => {
-        if (url) {
-          setGeneratedImageUrl(url);
+      generateImage(prompt).then(result => {
+        if (result.success && result.data) {
+          setGeneratedImageUrl(result.data);
         } else {
-          setGenerationError(true);
+          setGenerationError(result.error || "Erro desconhecido");
         }
         setIsGeneratingImage(false);
       });
@@ -252,7 +252,7 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
                 <button
                   onClick={() => {
                     setGeneratedImageUrl(null);
-                    setGenerationError(false);
+                    setGenerationError(null);
                   }}
                   className="absolute -top-3 -right-3 z-50 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-colors shadow-lg hover:scale-110 active:scale-95"
                   title="Fechar Imagem"
@@ -269,12 +269,14 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
                     <span className="text-sm font-medium tracking-wide">MATERIALIZANDO VISUAL...</span>
                   </div>
                 ) : generationError ? (
-                  <div className="flex flex-col items-center gap-3 text-red-400 p-6 text-center animate-in fade-in duration-300">
+                  <div className="flex flex-col items-center gap-3 text-red-400 p-6 text-center animate-in fade-in duration-300 w-full">
                     <div className="p-4 bg-red-500/10 rounded-full mb-2">
                       <X size={32} />
                     </div>
                     <span className="text-sm font-medium tracking-wide">FALHA NA MATERIALIZAÇÃO</span>
-                    <p className="text-xs text-red-500/70 mt-1">O sistema visual encontrou uma interferência.</p>
+                    <p className="text-xs text-red-500/70 mt-1 px-4 break-words w-full overflow-y-auto max-h-[100px]">
+                      {generationError}
+                    </p>
                   </div>
                 ) : (
                   <>

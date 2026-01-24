@@ -38,11 +38,11 @@ export const generateCharacterProfile = async (query: string): Promise<Character
   };
 };
 
-export const generateImage = async (prompt: string): Promise<string | null> => {
+export const generateImage = async (prompt: string): Promise<{ success: boolean; data?: string; error?: string }> => {
   try {
     const ai = getGeminiClient();
     const response = await ai.models.generateContent({
-      model: 'imagen-3.0-generate-001', // Updated to correct Imagen model
+      model: 'imagen-3.0-generate-001',
       contents: prompt,
       config: {
         responseMimeType: 'image/jpeg'
@@ -53,13 +53,19 @@ export const generateImage = async (prompt: string): Promise<string | null> => {
     const candidates = response.candidates;
     if (candidates && candidates[0]?.content?.parts?.[0]?.inlineData) {
       const inlineData = candidates[0].content.parts[0].inlineData;
-      return `data:${inlineData.mimeType};base64,${inlineData.data}`;
+      return { 
+        success: true, 
+        data: `data:${inlineData.mimeType};base64,${inlineData.data}` 
+      };
     }
     
-    return null;
-  } catch (error) {
+    return { success: false, error: 'No image data received from API' };
+  } catch (error: any) {
     console.error('Error generating image:', error);
-    return null;
+    return { 
+      success: false, 
+      error: error.message || JSON.stringify(error) 
+    };
   }
 };
 
