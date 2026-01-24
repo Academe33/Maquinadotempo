@@ -42,7 +42,7 @@ export const generateImage = async (prompt: string): Promise<string | null> => {
   try {
     const ai = getGeminiClient();
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash-image', // Nano Banana model
+      model: 'imagen-3.0-generate-001', // Updated to correct Imagen model
       contents: prompt,
       config: {
         responseMimeType: 'image/jpeg'

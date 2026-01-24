@@ -57,8 +57,8 @@ const AppContent: React.FC = () => {
       {/* Hero Section */}
       <div className="max-w-7xl mx-auto pt-20 px-6 text-center">
         <header className="mb-20">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 gradient-text">
-            Com quem você quer falar hoje?
+          <h1 className="text-5xl md:text-8xl font-sci font-black mb-8 gradient-text uppercase tracking-widest drop-shadow-[0_0_25px_rgba(168,85,247,0.4)]">
+            MÁQUINA DO TEMPO
           </h1>
           <p className="text-slate-400 text-lg md:text-xl max-w-2xl mx-auto font-light leading-relaxed">
             Explore nossa curadoria de figuras históricas e mentes brilhantes preparadas para conversar com você em tempo real por voz.
