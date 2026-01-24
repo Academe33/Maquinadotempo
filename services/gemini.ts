@@ -2,9 +2,9 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { Character } from "../types";
 
-// Always use the API key directly from process.env.API_KEY and initialize as a named parameter
+// Always use the API key directly from process.env.GEMINI_API_KEY (preferred) or process.env.API_KEY and initialize as a named parameter
 export const getGeminiClient = () => {
-  return new GoogleGenAI({ apiKey: process.env.API_KEY });
+  return new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || process.env.API_KEY });
 };
 
 export const generateCharacterProfile = async (query: string): Promise<Character> => {
