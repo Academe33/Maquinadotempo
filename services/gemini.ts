@@ -44,9 +44,6 @@ export const generateImage = async (prompt: string): Promise<{ success: boolean;
     const response = await ai.models.generateContent({
       model: 'imagen-3.0-generate-001',
       contents: prompt,
-      config: {
-        responseMimeType: 'image/jpeg'
-      }
     });
     
     // Check for inline data (base64)
