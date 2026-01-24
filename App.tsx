@@ -55,29 +55,29 @@ const AppContent: React.FC = () => {
       {showAdmin && <AdminPanel onClose={() => setShowAdmin(false)} />}
 
       {/* Hero Section */}
-      <div className="max-w-7xl mx-auto pt-20 px-6 text-center">
-        <header className="mb-20">
-          <h1 className="text-5xl md:text-8xl font-sci font-black mb-8 gradient-text uppercase tracking-widest drop-shadow-[0_0_25px_rgba(168,85,247,0.4)]">
+      <div className="max-w-6xl mx-auto pt-16 px-6 text-center">
+        <header className="mb-12">
+          <h1 className="text-4xl md:text-6xl font-sci font-black mb-6 gradient-text uppercase tracking-widest drop-shadow-[0_0_20px_rgba(168,85,247,0.4)]">
             MÁQUINA DO TEMPO
           </h1>
-          <p className="text-slate-400 text-lg md:text-xl max-w-2xl mx-auto font-light leading-relaxed">
+          <p className="text-slate-400 text-base md:text-lg max-w-xl mx-auto font-light leading-relaxed">
             Explore nossa curadoria de figuras históricas e mentes brilhantes preparadas para conversar com você em tempo real por voz.
           </p>
         </header>
 
         {/* Gallery Section - Paginated */}
-        <section className="mb-24">
-          <h2 className="text-4xl font-bold text-purple-500 mb-8">
+        <section className="mb-16">
+          <h2 className="text-3xl font-bold text-purple-500 mb-6">
             {selectedCategory}
           </h2>
 
           {/* Category Filter */}
-          <div className="flex flex-wrap justify-center gap-3 mb-10 max-w-5xl mx-auto">
+          <div className="flex flex-wrap justify-center gap-2 mb-8 max-w-4xl mx-auto">
             {categories.map((cat) => (
               <button
                 key={cat}
                 onClick={() => handleCategoryChange(cat)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-300 ${
                   selectedCategory === cat
                     ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/25 scale-105'
                     : 'bg-zinc-800 text-gray-400 hover:bg-zinc-700 hover:text-white'
@@ -101,7 +101,7 @@ const AppContent: React.FC = () => {
       </div>
 
       {/* Footer */}
-      <footer className="mt-32 border-t border-white/5 py-16 text-center text-slate-600 bg-[#070707]">
+      <footer className="mt-24 border-t border-white/5 py-12 text-center text-slate-600 bg-[#070707]">
         <div className="max-w-7xl mx-auto px-6">
           <p className="text-sm tracking-widest uppercase mb-2">PersonaChat Experience</p>
           <p className="text-xs">Powered by Gemini 2.5 Flash Native Audio</p>
