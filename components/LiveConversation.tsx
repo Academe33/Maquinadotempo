@@ -19,6 +19,7 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
   
   const audioContextRef = useRef<AudioContext | null>(null);
   const outputAudioContextRef = useRef<AudioContext | null>(null);
+  const gainNodeRef = useRef<GainNode | null>(null);
   const nextStartTimeRef = useRef<number>(0);
   const sourcesRef = useRef<Set<AudioBufferSourceNode>>(new Set());
   const sessionRef = useRef<any>(null);
@@ -84,6 +85,12 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
         audioContextRef.current = inputCtx;
         outputAudioContextRef.current = outputCtx;
 
+        // Setup Master Volume Gain for louder mobile output
+        const gainNode = outputCtx.createGain();
+        gainNode.gain.value = 3.5; // Boost volume by 3.5x
+        gainNode.connect(outputCtx.destination);
+        gainNodeRef.current = gainNode;
+
         const ai = getGeminiClient();
         const sessionPromise = ai.live.connect({
           model: 'gemini-2.5-flash-native-audio-preview-12-2025',
@@ -115,7 +122,11 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
                 const audioBuffer = await decodeAudioData(decode(base64Audio), ctx, 24000, 1);
                 const source = ctx.createBufferSource();
                 source.buffer = audioBuffer;
-                source.connect(ctx.destination);
+                if (gainNodeRef.current) {
+                  source.connect(gainNodeRef.current);
+                } else {
+                  source.connect(ctx.destination);
+                }
                 source.addEventListener('ended', () => sourcesRef.current.delete(source));
                 source.start(nextStartTimeRef.current);
                 nextStartTimeRef.current += audioBuffer.duration;
