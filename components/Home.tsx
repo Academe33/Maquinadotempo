@@ -47,7 +47,7 @@ const Home: React.FC = () => {
       </div>
 
       {/* Hero Section */}
-      <div className="max-w-6xl mx-auto pt-16 px-6 text-center">
+      <div className="max-w-6xl mx-auto pt-24 px-6 text-center">
         <header className="mb-12">
           <h1 className="text-[2.5rem] md:text-[4.125rem] font-sci font-black mb-6 gradient-text uppercase tracking-widest drop-shadow-[0_0_20px_rgba(168,85,247,0.4)]">
             MÁQUINA DO TEMPO
