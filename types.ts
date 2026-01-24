@@ -7,6 +7,7 @@ export interface Character {
   image: string;
   category: string;
   systemInstruction: string;
+  knowledge?: string;
   voiceName?: 'Puck' | 'Charon' | 'Kore' | 'Fenrir' | 'Zephyr';
 }
 

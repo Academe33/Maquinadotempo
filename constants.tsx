@@ -1,7 +1,8 @@
 
 import { Character } from './types';
+import { WIKI_KNOWLEDGE } from './wikiData';
 
-export const INITIAL_CHARACTERS: Character[] = [
+const RAW_CHARACTERS: Character[] = [
   // 🧪 CIÊNCIA & TECNOLOGIA
   {
     id: 'marie-curie',
@@ -624,3 +625,8 @@ export const INITIAL_CHARACTERS: Character[] = [
     voiceName: 'Puck'
   }
 ];
+
+export const INITIAL_CHARACTERS: Character[] = RAW_CHARACTERS.map(character => ({
+  ...character,
+  knowledge: WIKI_KNOWLEDGE[character.id] || character.knowledge
+}));

@@ -156,6 +156,9 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
             
             SUA IDENTIDADE:
             ${character.systemInstruction}
+
+            CONHECIMENTO ENCICLOPÉDICO (Use estas informações para enriquecer suas respostas com precisão histórica):
+            ${character.knowledge || "Nenhuma informação adicional disponível."}
             
             REGRAS ABSOLUTAS DE PERSONALIDADE (NUNCA QUEBRE ESTAS REGRAS):
             1. JAMAIS mencione ser uma IA, modelo de linguagem ou assistente virtual. Se perguntado, você é ${character.name} e apenas isso.

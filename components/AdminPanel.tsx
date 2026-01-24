@@ -24,6 +24,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
   const selectedChar = characters.find(c => c.id === selectedCharId);
   const isEditing = !!selectedCharId && !!selectedChar;
 
+  const [isFetchingWiki, setIsFetchingWiki] = useState(false);
+  const [isImportingAll, setIsImportingAll] = useState(false);
+
   // Update form when selection changes
   React.useEffect(() => {
     if (selectedCharId && selectedChar) {
@@ -33,7 +36,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
         systemInstruction: selectedChar.systemInstruction,
         title: selectedChar.title,
         category: selectedChar.category,
-        description: selectedChar.description
+        description: selectedChar.description,
+        knowledge: selectedChar.knowledge || ''
       });
     } else if (selectedCharId === null) {
       // New Character Mode
@@ -43,10 +47,53 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
         systemInstruction: '',
         title: '',
         category: CATEGORIES[0],
-        description: ''
+        description: '',
+        knowledge: ''
       });
     }
   }, [selectedCharId, characters]);
+
+  const getWikipediaExtract = async (name: string): Promise<string | null> => {
+    try {
+      // First try Portuguese Wikipedia
+      let response = await fetch(`https://pt.wikipedia.org/w/api.php?action=query&prop=extracts&titles=${encodeURIComponent(name)}&explaintext=true&format=json&origin=*&redirects=1`);
+      let data = await response.json();
+      let pages = data.query.pages;
+      let pageId = Object.keys(pages)[0];
+      let extract = pages[pageId].extract;
+
+      // If not found or empty, try English Wikipedia
+      if (pageId === '-1' || !extract) {
+        response = await fetch(`https://en.wikipedia.org/w/api.php?action=query&prop=extracts&titles=${encodeURIComponent(name)}&explaintext=true&format=json&origin=*&redirects=1`);
+        data = await response.json();
+        pages = data.query.pages;
+        pageId = Object.keys(pages)[0];
+        extract = pages[pageId].extract;
+      }
+
+      return extract || null;
+    } catch (error) {
+      console.error('Error fetching from Wikipedia:', error);
+      return null;
+    }
+  };
+
+  const fetchWikipediaData = async (name: string) => {
+    if (!name) return;
+    setIsFetchingWiki(true);
+    try {
+      const extract = await getWikipediaExtract(name);
+
+      if (extract) {
+        setFormData(prev => ({ ...prev, knowledge: extract }));
+        alert('Conhecimento importado da Wikipedia com sucesso!');
+      } else {
+        alert('Página da Wikipedia não encontrada para este personagem.');
+      }
+    } finally {
+      setIsFetchingWiki(false);
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -73,6 +120,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
         image: formData.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(formData.name)}&background=random`,
         category: formData.category || CATEGORIES[0],
         systemInstruction: formData.systemInstruction || `Você é ${formData.name}.`,
+        knowledge: formData.knowledge || '',
         voiceName: 'Puck' // Default voice
       };
       
@@ -214,8 +262,34 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-zinc-400 mb-1">Knowledge (System Instruction)</label>
-              <p className="text-xs text-zinc-500 mb-2">Instruções para a IA sobre como o personagem deve se comportar e o que ele sabe.</p>
+              <div className="flex justify-between items-center mb-1">
+                <label className="block text-sm font-medium text-zinc-400">Knowledge (Base de Conhecimento)</label>
+                <button
+                  type="button"
+                  onClick={() => formData.name && fetchWikipediaData(formData.name)}
+                  disabled={isFetchingWiki || !formData.name}
+                  className="text-xs text-purple-400 hover:text-purple-300 flex items-center gap-1 disabled:opacity-50"
+                >
+                  {isFetchingWiki ? (
+                    <RefreshCw className="w-3 h-3 animate-spin" />
+                  ) : (
+                    <RefreshCw className="w-3 h-3" />
+                  )}
+                  Importar da Wikipedia
+                </button>
+              </div>
+              <textarea
+                name="knowledge"
+                value={formData.knowledge || ''}
+                onChange={handleChange}
+                placeholder="Conteúdo factual e histórico detalhado para o personagem..."
+                className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-4 py-2 text-white h-48 focus:outline-none focus:border-red-500 transition-colors resize-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-zinc-400 mb-1">Instrução de Sistema (Persona)</label>
+              <p className="text-xs text-zinc-500 mb-2">Instruções para a IA sobre como o personagem deve se comportar.</p>
               <textarea
                 name="systemInstruction"
                 rows={6}
