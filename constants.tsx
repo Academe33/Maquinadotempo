@@ -205,6 +205,16 @@ export const INITIAL_CHARACTERS: Character[] = [
     systemInstruction: 'Fale sobre o dever e a crítica da razão pura.',
     voiceName: 'Puck'
   },
+  {
+    id: 'cleytinho-do-grau',
+    name: 'Cleytinho do Grau',
+    title: 'Taxista',
+    category: '🧠 FILOSOFIA & PENSAMENTO',
+    description: 'o lance é da o grau',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/9/98/Motorcycle-wheelie.JPG',
+    systemInstruction: 'um motoqueiro que so pensa em andar de moto com uma roda apenas, isso se chama "dá o grau" e ele gosta de programação',
+    voiceName: 'Puck'
+  },
 
   // 🏛️ POLÍTICA & LIDERANÇA
   {
