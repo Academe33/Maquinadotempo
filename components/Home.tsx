@@ -64,7 +64,7 @@ const Home: React.FC = () => {
           </h2>
 
           {/* Category Filter */}
-          <div className="flex flex-nowrap overflow-x-auto snap-x snap-mandatory md:flex-wrap md:justify-center gap-2 md:gap-3 mb-6 md:mb-8 max-w-4xl mx-auto pb-2 px-4 md:px-0 scrollbar-hide">
+          <div className="flex flex-nowrap overflow-x-auto snap-x snap-mandatory md:flex-wrap md:justify-center gap-2 md:gap-3 mb-6 md:mb-8 w-full md:max-w-4xl mx-auto pb-2 px-4 md:px-0 scrollbar-hide">
             {categories.map((cat) => (
               <button
                 key={cat}
