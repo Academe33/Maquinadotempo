@@ -24,6 +24,11 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
   const streamRef = useRef<MediaStream | null>(null);
   const processorRef = useRef<ScriptProcessorNode | null>(null);
   const textContainerRef = useRef<HTMLDivElement>(null);
+  const isMutedRef = useRef(isMuted);
+
+  useEffect(() => {
+    isMutedRef.current = isMuted;
+  }, [isMuted]);
 
   useEffect(() => {
     if (textContainerRef.current) {
@@ -89,7 +94,7 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
               processorRef.current = scriptProcessor;
 
               scriptProcessor.onaudioprocess = (e) => {
-                if (isMuted) return;
+                if (isMutedRef.current) return;
                 const inputData = e.inputBuffer.getChannelData(0);
                 const pcmBlob = createBlob(inputData);
                 sessionPromise.then((session) => {
