@@ -246,6 +246,15 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
           {/* Generated Image Display */}
           {(generatedImageUrl || isGeneratingImage) && (
             <div className="relative animate-in fade-in slide-in-from-bottom-10 md:slide-in-from-left-10 duration-700 z-10">
+              {generatedImageUrl && (
+                <button
+                  onClick={() => setGeneratedImageUrl(null)}
+                  className="absolute -top-3 -right-3 z-50 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-colors shadow-lg hover:scale-110 active:scale-95"
+                  title="Fechar Imagem"
+                >
+                  <X size={16} />
+                </button>
+              )}
               <div className="w-64 h-64 md:w-80 md:h-80 rounded-2xl overflow-hidden border-4 border-purple-500/30 shadow-2xl shadow-purple-900/20 bg-[#151515] flex items-center justify-center relative group">
                 {isGeneratingImage ? (
                   <div className="flex flex-col items-center gap-3 text-purple-400 animate-pulse p-6 text-center">
