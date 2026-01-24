@@ -13,12 +13,12 @@ export default defineConfig(({ mode }) => {
       plugins: [
         react(),
         VitePWA({
-          registerType: 'autoUpdate',
-          includeAssets: ['icon.svg'],
-          manifest: {
-            name: 'PersonaChat - Tutores Históricos',
-            short_name: 'PersonaChat',
-            description: 'Converse com figuras históricas e mentes brilhantes em tempo real.',
+      registerType: 'autoUpdate',
+      includeAssets: ['icon.svg'],
+      manifest: {
+        name: 'Máquina do Tempo',
+        short_name: 'Máquina do Tempo',
+        description: 'Converse com figuras históricas e mentes brilhantes em tempo real.',
             theme_color: '#0a0a0a',
             background_color: '#0a0a0a',
             display: 'standalone',
