@@ -23,6 +23,13 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
   const sessionRef = useRef<any>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const processorRef = useRef<ScriptProcessorNode | null>(null);
+  const textContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (textContainerRef.current) {
+      textContainerRef.current.scrollTop = textContainerRef.current.scrollHeight;
+    }
+  }, [currentModelText]);
 
   const cleanup = useCallback(() => {
     if (sessionRef.current) {
@@ -207,10 +214,13 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
           <p className="text-blue-400 font-medium tracking-wide uppercase text-sm mb-6">{character.title}</p>
           
           {/* Subtitles Overlay */}
-          <div className="min-h-[100px] flex items-center justify-center px-6">
-            <div className="max-w-2xl">
+          <div className="min-h-[100px] flex items-center justify-center px-6 w-full">
+            <div 
+              ref={textContainerRef}
+              className="max-w-2xl w-full max-h-[9rem] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']"
+            >
               {currentModelText ? (
-                <p className="text-2xl text-white font-medium leading-relaxed drop-shadow-sm">
+                <p className="text-2xl text-white font-medium leading-relaxed drop-shadow-sm text-center">
                   {currentModelText}
                 </p>
               ) : userInputText ? (
