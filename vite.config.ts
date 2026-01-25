@@ -15,9 +15,6 @@ export default defineConfig(({ mode }) => {
         VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['icon.svg'],
-      workbox: {
-        maximumFileSizeToCacheInBytes: 4000000
-      },
       manifest: {
         name: 'Máquina do Tempo',
         short_name: 'Máquina do Tempo',
@@ -47,11 +44,9 @@ export default defineConfig(({ mode }) => {
         }
       },
       build: {
-        chunkSizeWarningLimit: 3000,
         rollupOptions: {
           output: {
             manualChunks: {
-              'wiki-data': ['./wikiData.ts'],
               'vendor': ['react', 'react-dom']
             }
           }
