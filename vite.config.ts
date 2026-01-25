@@ -15,6 +15,9 @@ export default defineConfig(({ mode }) => {
         VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['icon.svg'],
+      workbox: {
+        maximumFileSizeToCacheInBytes: 4000000
+      },
       manifest: {
         name: 'Máquina do Tempo',
         short_name: 'Máquina do Tempo',
