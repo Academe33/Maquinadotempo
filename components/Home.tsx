@@ -47,13 +47,13 @@ const Home: React.FC = () => {
       </div>
 
       {/* Hero Section */}
-      <div className="max-w-6xl mx-auto pt-24 px-6 text-center">
+      <div className="max-w-6xl mx-auto pt-24 px-4 md:px-6 text-center">
         <header className="mb-12">
           <h1 className="text-[2.5rem] md:text-[4.125rem] font-sci font-black mb-6 gradient-text uppercase tracking-widest drop-shadow-[0_0_20px_rgba(168,85,247,0.4)]">
             MÁQUINA DO TEMPO
           </h1>
           <p className="text-slate-400 text-base md:text-lg max-w-xl mx-auto font-light leading-relaxed">
-            Converse com qualquer figura histórica e mentes brilhantes com você em tempo real por voz.
+            Converse por voz com qualquer figura histórica em tempo real.
           </p>
         </header>
 

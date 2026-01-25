@@ -201,7 +201,7 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
   };
 
   return (
-    <div className="fixed inset-0 bg-[#0a0a0a] z-50 flex flex-col items-center justify-between p-8">
+    <div className="fixed inset-0 bg-[#0a0a0a] z-50 flex flex-col items-center justify-between p-4 md:p-8">
       {/* Logo */}
       <div className="absolute top-6 left-6 z-50">
         <Logo />
