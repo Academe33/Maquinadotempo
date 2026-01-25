@@ -1,19 +1,22 @@
 import React, { useState } from 'react';
 import { useCharacters } from '../contexts/CharacterContext';
 import { Character } from '../types';
-import { Save, RefreshCw, X, Plus, Trash2 } from 'lucide-react';
+import { Save, RefreshCw, X, Plus, Trash2, Download } from 'lucide-react';
+import { WIKI_KNOWLEDGE } from '../wikiData';
 
 interface AdminPanelProps {
   onClose: () => void;
 }
 
 const CATEGORIES = [
-  '🧪 CIÊNCIA & TECNOLOGIA',
-  '🧠 FILOSOFIA & PENSAMENTO',
-  '🏛️ POLÍTICA & LIDERANÇA',
-  '🎨 ARTES & CULTURA',
-  '🌍 EXPLORAÇÃO & DESCOBERTAS GEOGRÁFICAS',
-  '🧭 EMPREENDEDORISMO & INOVAÇÃO SOCIAL'
+  '📐 MATEMÁTICA',
+  '⚛️ FÍSICA',
+  '🧪 QUÍMICA',
+  '🧬 BIOLOGIA',
+  '📜 HISTÓRIA',
+  '🌍 GEOGRAFIA',
+  '🤔 FILOSOFIA',
+  '📚 LITERATURA'
 ];
 
 const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
@@ -24,8 +27,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
   const selectedChar = characters.find(c => c.id === selectedCharId);
   const isEditing = !!selectedCharId && !!selectedChar;
 
-  const [isFetchingWiki, setIsFetchingWiki] = useState(false);
-  const [isImportingAll, setIsImportingAll] = useState(false);
+
+
 
   // Update form when selection changes
   React.useEffect(() => {
@@ -53,46 +56,26 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
     }
   }, [selectedCharId, characters]);
 
-  const getWikipediaExtract = async (name: string): Promise<string | null> => {
-    try {
-      // First try Portuguese Wikipedia
-      let response = await fetch(`https://pt.wikipedia.org/w/api.php?action=query&prop=extracts&titles=${encodeURIComponent(name)}&explaintext=true&format=json&origin=*&redirects=1`);
-      let data = await response.json();
-      let pages = data.query.pages;
-      let pageId = Object.keys(pages)[0];
-      let extract = pages[pageId].extract;
-
-      // If not found or empty, try English Wikipedia
-      if (pageId === '-1' || !extract) {
-        response = await fetch(`https://en.wikipedia.org/w/api.php?action=query&prop=extracts&titles=${encodeURIComponent(name)}&explaintext=true&format=json&origin=*&redirects=1`);
-        data = await response.json();
-        pages = data.query.pages;
-        pageId = Object.keys(pages)[0];
-        extract = pages[pageId].extract;
-      }
-
-      return extract || null;
-    } catch (error) {
-      console.error('Error fetching from Wikipedia:', error);
-      return null;
+  const handleImportAll = () => {
+    if (!confirm('Isso irá carregar o conhecimento da Wikipedia para TODOS os personagens (instantâneo). O conteúdo atual será substituído. Deseja continuar?')) {
+      return;
     }
-  };
 
-  const fetchWikipediaData = async (name: string) => {
-    if (!name) return;
-    setIsFetchingWiki(true);
-    try {
-      const extract = await getWikipediaExtract(name);
-
-      if (extract) {
-        setFormData(prev => ({ ...prev, knowledge: extract }));
-        alert('Conhecimento importado da Wikipedia com sucesso!');
-      } else {
-        alert('Página da Wikipedia não encontrada para este personagem.');
+    let updatedCount = 0;
+    
+    characters.forEach(char => {
+      const wikiContent = WIKI_KNOWLEDGE[char.id];
+      if (wikiContent) {
+        updateCharacter(char.id, { knowledge: wikiContent });
+        updatedCount++;
+        
+        if (selectedCharId === char.id) {
+          setFormData(prev => ({ ...prev, knowledge: wikiContent }));
+        }
       }
-    } finally {
-      setIsFetchingWiki(false);
-    }
+    });
+
+    alert(`Importação concluída! ${updatedCount} de ${characters.length} personagens atualizados.`);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -156,7 +139,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
           {/* Sidebar - Character List */}
           <div className="md:col-span-1 border-r border-zinc-800 pr-4 h-[600px] flex flex-col">
             <h3 className="text-lg font-semibold text-zinc-400 mb-4">Personagens</h3>
-            
+
             <button
               onClick={() => setSelectedCharId(null)}
               className={`w-full text-left px-4 py-3 rounded-lg text-sm transition-colors flex items-center gap-3 mb-2 border-2 border-dashed ${
@@ -264,19 +247,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
             <div>
               <div className="flex justify-between items-center mb-1">
                 <label className="block text-sm font-medium text-zinc-400">Knowledge (Base de Conhecimento)</label>
-                <button
-                  type="button"
-                  onClick={() => formData.name && fetchWikipediaData(formData.name)}
-                  disabled={isFetchingWiki || !formData.name}
-                  className="text-xs text-purple-400 hover:text-purple-300 flex items-center gap-1 disabled:opacity-50"
-                >
-                  {isFetchingWiki ? (
-                    <RefreshCw className="w-3 h-3 animate-spin" />
-                  ) : (
-                    <RefreshCw className="w-3 h-3" />
-                  )}
-                  Importar da Wikipedia
-                </button>
               </div>
               <textarea
                 name="knowledge"
@@ -302,6 +272,15 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
 
             <div className="pt-6 flex items-center justify-between border-t border-zinc-800">
               <div className="flex gap-2">
+                <button
+                  onClick={handleImportAll}
+                  className="flex items-center gap-2 px-4 py-2 text-sm text-blue-500 hover:text-blue-400 transition-colors"
+                  title="Importar conhecimento da Wikipedia para todos os personagens"
+                >
+                  <Download className="w-4 h-4" />
+                  <span className="hidden sm:inline">Importar Wiki</span>
+                </button>
+
                 <button
                   onClick={resetCharacters}
                   className="flex items-center gap-2 px-4 py-2 text-sm text-zinc-500 hover:text-white transition-colors"
