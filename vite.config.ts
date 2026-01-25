@@ -42,6 +42,17 @@ export default defineConfig(({ mode }) => {
         alias: {
           '@': path.resolve(__dirname, '.'),
         }
+      },
+      build: {
+        chunkSizeWarningLimit: 3000,
+        rollupOptions: {
+          output: {
+            manualChunks: {
+              'wiki-data': ['./wikiData.ts'],
+              'vendor': ['react', 'react-dom']
+            }
+          }
+        }
       }
     };
 });
