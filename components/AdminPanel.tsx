@@ -129,7 +129,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
     <div className="fixed inset-0 bg-[#0a0a0a] z-50 overflow-y-auto p-4 md:p-8">
       <div className="max-w-4xl mx-auto bg-[#121212] border border-zinc-800 rounded-2xl p-6 shadow-2xl">
         <div className="flex justify-between items-center mb-8 border-b border-zinc-800 pb-4">
-          <h2 className="text-3xl font-bold text-red-500">Painel Administrativo</h2>
+          <h2 className="text-3xl font-bold text-purple-500">Painel Administrativo</h2>
           <button onClick={onClose} className="p-2 hover:bg-zinc-800 rounded-full transition-colors">
             <X className="w-6 h-6 text-zinc-400" />
           </button>
