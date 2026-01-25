@@ -303,10 +303,10 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
 
               <button
                 onClick={handleSave}
-                className="flex items-center gap-2 px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors"
+                className="flex items-center gap-2 px-6 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors"
               >
                 <Save className="w-4 h-4" />
-                {isEditing ? 'Salvar Alterações' : 'Criar Personagem'}
+                {isEditing ? 'Salvar' : 'Criar Personagem'}
               </button>
             </div>
           </div>
