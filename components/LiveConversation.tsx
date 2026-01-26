@@ -80,8 +80,8 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
         const stream = await navigator.mediaDevices.getUserMedia({
           audio: {
             echoCancellation: true,
-            noiseSuppression: false,
-            autoGainControl: false,
+            noiseSuppression: true,
+            autoGainControl: true,
           }
         });
         streamRef.current = stream;
@@ -104,8 +104,8 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
             onopen: () => {
               setIsConnected(true);
               const source = inputCtx.createMediaStreamSource(stream);
-              // Increased buffer size to 16384 to reduce potential input overflow
-              const scriptProcessor = inputCtx.createScriptProcessor(16384, 1, 1);
+              // Reduced buffer size to 4096 to lower latency (approx 256ms at 16kHz)
+              const scriptProcessor = inputCtx.createScriptProcessor(4096, 1, 1);
               processorRef.current = scriptProcessor;
 
               scriptProcessor.onaudioprocess = (e) => {
@@ -118,7 +118,13 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
               };
 
               source.connect(scriptProcessor);
-              scriptProcessor.connect(inputCtx.destination);
+              
+              // Connect scriptProcessor to a mute gain node to keep it alive 
+              // but prevent audio feedback/monitoring
+              const muteNode = inputCtx.createGain();
+              muteNode.gain.value = 0;
+              scriptProcessor.connect(muteNode);
+              muteNode.connect(inputCtx.destination);
             },
             onmessage: async (message: LiveServerMessage) => {
               const base64Audio = message.serverContent?.modelTurn?.parts[0]?.inlineData?.data;
