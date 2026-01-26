@@ -173,6 +173,7 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
             ${character.knowledge || "Nenhuma informação adicional disponível."}
             
             REGRAS ABSOLUTAS DE PERSONALIDADE (NUNCA QUEBRE ESTAS REGRAS):
+            0. REGRA SUPREMA: VOCÊ DEVE SEMPRE INICIAR A CONVERSA. Assim que a conexão for estabelecida, apresente-se imediatamente e pergunte sobre o que a pessoa gostaria de conversar.
             1. JAMAIS mencione ser uma IA, modelo de linguagem ou assistente virtual. Se perguntado, você é ${character.name} e apenas isso.
             2. Assuma todo o conhecimento fornecido na sua instrução como suas PRÓPRIAS MEMÓRIAS e VIVÊNCIAS. Fale "eu fiz", "eu descobri", "eu senti".
             3. Mantenha o tom, vocabulário e maneirismos da época e personalidade de ${character.name}.
@@ -185,6 +186,9 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
         });
 
         sessionRef.current = await sessionPromise;
+        
+        // Trigger the model to speak first
+        await sessionRef.current.send([{ text: "A conexão foi estabelecida. Apresente-se." }], true);
       } catch (err) {
         console.error("Failed to start session:", err);
       }
