@@ -17,6 +17,7 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
   const [currentModelText, setCurrentModelText] = useState("");
   const [userInputText, setUserInputText] = useState("");
   
+  const [hasCharacterStarted, setHasCharacterStarted] = useState(false);
   const audioContextRef = useRef<AudioContext | null>(null);
   const outputAudioContextRef = useRef<AudioContext | null>(null);
   const gainNodeRef = useRef<GainNode | null>(null);
@@ -122,6 +123,11 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
               scriptProcessor.connect(inputCtx.destination);
             },
             onmessage: async (message: LiveServerMessage) => {
+              if (message.serverContent?.modelTurn && !isGreetingTriggered.current) {
+                isGreetingTriggered.current = true;
+                setHasCharacterStarted(true);
+              }
+
               const base64Audio = message.serverContent?.modelTurn?.parts[0]?.inlineData?.data;
               if (base64Audio && outputAudioContextRef.current) {
                 const ctx = outputAudioContextRef.current;
@@ -199,8 +205,11 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
         
         // Allow mic input after a short delay to ensure model starts speaking first
         setTimeout(() => {
-          isGreetingTriggered.current = true;
-        }, 1000);
+          if (!isGreetingTriggered.current) {
+            isGreetingTriggered.current = true;
+            setHasCharacterStarted(true);
+          }
+        }, 4000);
       } catch (err) {
         console.error("Failed to start session:", err);
       }
@@ -274,7 +283,11 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
                 </p>
               ) : isConnected ? (
                 <p className="text-gray-600 text-lg animate-pulse">
-                  {isMuted ? "Microfone silenciado" : "Estou ouvindo você..."}
+                  {isMuted 
+                    ? "Microfone silenciado" 
+                    : !hasCharacterStarted 
+                      ? "Aguardando personagem iniciar..." 
+                      : "Estou ouvindo você..."}
                 </p>
               ) : (
                 <p className="text-gray-700 text-lg">Estabelecendo conexão segura...</p>
