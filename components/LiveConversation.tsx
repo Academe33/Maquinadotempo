@@ -17,7 +17,6 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
   const [currentModelText, setCurrentModelText] = useState("");
   const [userInputText, setUserInputText] = useState("");
   
-  const [hasCharacterStarted, setHasCharacterStarted] = useState(false);
   const audioContextRef = useRef<AudioContext | null>(null);
   const outputAudioContextRef = useRef<AudioContext | null>(null);
   const gainNodeRef = useRef<GainNode | null>(null);
@@ -28,7 +27,6 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
   const processorRef = useRef<ScriptProcessorNode | null>(null);
   const textContainerRef = useRef<HTMLDivElement>(null);
   const isMutedRef = useRef(isMuted);
-  const isFirstTurnComplete = useRef(false);
 
   useEffect(() => {
     isMutedRef.current = isMuted;
@@ -111,7 +109,7 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
               processorRef.current = scriptProcessor;
 
               scriptProcessor.onaudioprocess = (e) => {
-                if (isMutedRef.current || !isFirstTurnComplete.current) return;
+                if (isMutedRef.current) return;
                 const inputData = e.inputBuffer.getChannelData(0);
                 const pcmBlob = createBlob(inputData);
                 sessionPromise.then((session) => {
@@ -123,10 +121,6 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
               scriptProcessor.connect(inputCtx.destination);
             },
             onmessage: async (message: LiveServerMessage) => {
-              if (message.serverContent?.modelTurn) {
-                setHasCharacterStarted(true);
-              }
-
               const base64Audio = message.serverContent?.modelTurn?.parts[0]?.inlineData?.data;
               if (base64Audio && outputAudioContextRef.current) {
                 const ctx = outputAudioContextRef.current;
@@ -158,11 +152,6 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
                 setCurrentModelText(prev => prev + message.serverContent!.outputTranscription!.text);
               }
               if (message.serverContent?.turnComplete) {
-                // Unlock mic after the first turn is complete
-                if (!isFirstTurnComplete.current) {
-                  isFirstTurnComplete.current = true;
-                }
-                
                 setTimeout(() => {
                    setUserInputText("");
                    setCurrentModelText("");
@@ -205,15 +194,7 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
         sessionRef.current = await sessionPromise;
         
         // Trigger the model to speak first
-        await sessionRef.current.send([{ text: "A conexão foi estabelecida. Apresente-se imediatamente." }], true);
-        
-        // Allow mic input after a failsafe delay (10s) just in case
-        setTimeout(() => {
-          if (!isFirstTurnComplete.current) {
-            isFirstTurnComplete.current = true;
-            setHasCharacterStarted(true);
-          }
-        }, 10000);
+        await sessionRef.current.send([{ text: "A conexão foi estabelecida. Apresente-se." }], true);
       } catch (err) {
         console.error("Failed to start session:", err);
       }
@@ -287,11 +268,7 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
                 </p>
               ) : isConnected ? (
                 <p className="text-gray-600 text-lg animate-pulse">
-                  {isMuted 
-                    ? "Microfone silenciado" 
-                    : !hasCharacterStarted 
-                      ? "Aguardando personagem iniciar..." 
-                      : "Estou ouvindo você..."}
+                  {isMuted ? "Microfone silenciado" : "Estou ouvindo você..."}
                 </p>
               ) : (
                 <p className="text-gray-700 text-lg">Estabelecendo conexão segura...</p>
