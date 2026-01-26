@@ -27,6 +27,7 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
   const processorRef = useRef<ScriptProcessorNode | null>(null);
   const textContainerRef = useRef<HTMLDivElement>(null);
   const isMutedRef = useRef(isMuted);
+  const isGreetingTriggered = useRef(false);
 
   useEffect(() => {
     isMutedRef.current = isMuted;
@@ -109,7 +110,7 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
               processorRef.current = scriptProcessor;
 
               scriptProcessor.onaudioprocess = (e) => {
-                if (isMutedRef.current) return;
+                if (isMutedRef.current || !isGreetingTriggered.current) return;
                 const inputData = e.inputBuffer.getChannelData(0);
                 const pcmBlob = createBlob(inputData);
                 sessionPromise.then((session) => {
@@ -194,7 +195,12 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
         sessionRef.current = await sessionPromise;
         
         // Trigger the model to speak first
-        await sessionRef.current.send([{ text: "A conexão foi estabelecida. Apresente-se." }], true);
+        await sessionRef.current.send([{ text: "A conexão foi estabelecida. Apresente-se imediatamente." }], true);
+        
+        // Allow mic input after a short delay to ensure model starts speaking first
+        setTimeout(() => {
+          isGreetingTriggered.current = true;
+        }, 1000);
       } catch (err) {
         console.error("Failed to start session:", err);
       }
