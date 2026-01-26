@@ -82,6 +82,13 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
             echoCancellation: false,
             noiseSuppression: false,
             autoGainControl: false,
+            // @ts-ignore - Properties might not be in standard types but are supported by browsers
+            googEchoCancellation: false,
+            googAutoGainControl: false,
+            googNoiseSuppression: false,
+            googHighpassFilter: false,
+            googTypingNoiseDetection: false,
+            googBeamforming: false,
           }
         });
         streamRef.current = stream;
