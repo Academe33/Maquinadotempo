@@ -77,7 +77,13 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
   useEffect(() => {
     const initSession = async () => {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            echoCancellation: true,
+            noiseSuppression: false,
+            autoGainControl: false,
+          }
+        });
         streamRef.current = stream;
 
         const inputCtx = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 16000 });
