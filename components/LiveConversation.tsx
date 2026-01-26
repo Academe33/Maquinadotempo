@@ -208,7 +208,7 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col items-center justify-center w-full max-w-6xl translate-y-[15%]">
+      <div className="flex-1 flex flex-col items-center justify-center w-full max-w-6xl translate-y-[calc(15%_-_15px)]">
         
         {/* Visuals Container */}
         <div className="flex items-center justify-center mb-8 md:mb-12 w-full">
@@ -270,7 +270,7 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
 
       {/* Centralized Bottom Controls */}
       <div className="pb-12">
-        <div className="flex items-center gap-8 px-8 py-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-full shadow-2xl">
+        <div className="flex items-center gap-8 px-8 py-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-full shadow-2xl translate-y-[15%]">
           <button 
             onClick={() => setIsMuted(!isMuted)}
             className={`p-5 rounded-full transition-all duration-300 transform active:scale-90 ${isMuted ? 'bg-red-500/20 text-red-500 border border-red-500/40' : 'bg-white/10 hover:bg-white/20 text-white'}`}
