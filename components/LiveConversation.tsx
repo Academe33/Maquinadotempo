@@ -79,7 +79,7 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
           audio: {
-            echoCancellation: true,
+            echoCancellation: false,
             noiseSuppression: false,
             autoGainControl: false,
           }
