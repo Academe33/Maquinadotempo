@@ -28,7 +28,7 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
   const processorRef = useRef<ScriptProcessorNode | null>(null);
   const textContainerRef = useRef<HTMLDivElement>(null);
   const isMutedRef = useRef(isMuted);
-  const isGreetingTriggered = useRef(false);
+  const isFirstTurnComplete = useRef(false);
 
   useEffect(() => {
     isMutedRef.current = isMuted;
@@ -111,7 +111,7 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
               processorRef.current = scriptProcessor;
 
               scriptProcessor.onaudioprocess = (e) => {
-                if (isMutedRef.current || !isGreetingTriggered.current) return;
+                if (isMutedRef.current || !isFirstTurnComplete.current) return;
                 const inputData = e.inputBuffer.getChannelData(0);
                 const pcmBlob = createBlob(inputData);
                 sessionPromise.then((session) => {
@@ -123,8 +123,7 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
               scriptProcessor.connect(inputCtx.destination);
             },
             onmessage: async (message: LiveServerMessage) => {
-              if (message.serverContent?.modelTurn && !isGreetingTriggered.current) {
-                isGreetingTriggered.current = true;
+              if (message.serverContent?.modelTurn) {
                 setHasCharacterStarted(true);
               }
 
@@ -159,6 +158,11 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
                 setCurrentModelText(prev => prev + message.serverContent!.outputTranscription!.text);
               }
               if (message.serverContent?.turnComplete) {
+                // Unlock mic after the first turn is complete
+                if (!isFirstTurnComplete.current) {
+                  isFirstTurnComplete.current = true;
+                }
+                
                 setTimeout(() => {
                    setUserInputText("");
                    setCurrentModelText("");
@@ -203,13 +207,13 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
         // Trigger the model to speak first
         await sessionRef.current.send([{ text: "A conexão foi estabelecida. Apresente-se imediatamente." }], true);
         
-        // Allow mic input after a short delay to ensure model starts speaking first
+        // Allow mic input after a failsafe delay (10s) just in case
         setTimeout(() => {
-          if (!isGreetingTriggered.current) {
-            isGreetingTriggered.current = true;
+          if (!isFirstTurnComplete.current) {
+            isFirstTurnComplete.current = true;
             setHasCharacterStarted(true);
           }
-        }, 4000);
+        }, 10000);
       } catch (err) {
         console.error("Failed to start session:", err);
       }
