@@ -93,7 +93,8 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
 
         // Setup Master Volume Gain for louder mobile output
         const gainNode = outputCtx.createGain();
-        gainNode.gain.value = 1.0; // Standard volume (no boost)
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        gainNode.gain.value = isMobile ? 3.0 : 1.0; // Boost volume 3x on mobile, standard on desktop
         gainNode.connect(outputCtx.destination);
         gainNodeRef.current = gainNode;
 
