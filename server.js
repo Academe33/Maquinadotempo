@@ -1,5 +1,4 @@
 import express from 'express';
-import { WebSocketServer, WebSocket } from 'ws';
 import cors from 'cors';
 import { GoogleGenAI } from '@google/genai';
 import http from 'http';
@@ -67,88 +66,35 @@ app.post('/api/generate-character', async (req, res) => {
   }
 });
 
-const server = http.createServer(app);
-
-// 2. Servidor WebSocket Proxy para o Gemini Live API
-const wss = new WebSocketServer({ server });
-
-wss.on('connection', (clientWs, req) => {
-  // Apenas intercepta conexões que venham da nossa rota proxy configurada
-  if (req.url && req.url.startsWith('/api/gemini/ws/')) {
+// 2. Endpoint REST que emite um token efêmero para a Live API.
+// O navegador conecta direto no WebSocket do Google usando o token —
+// a chave real nunca sai do servidor e não é preciso proxy WS
+// (que a Vercel não suporta em funções serverless).
+app.post('/api/live-token', async (req, res) => {
+  try {
     const apiKey = getApiKey();
+    if (!apiKey) throw new Error('API Key nao configurada no ambiente do servidor');
 
-    if (!apiKey) {
-      console.error('[WS Proxy] GEMINI_API_KEY ausente no ambiente do servidor.');
-      clientWs.close(1011, 'Server API key missing');
-      return;
-    }
-
-    console.log('[WS Proxy] Nova conexão recebida:', req.url);
-    
-    // Remove o prefixo do nosso proxy interno
-    const targetUrlPath = req.url.replace('/api/gemini', '');
-    
-    // Constrói a URL de destino oficial do Google Gemini
-    // Substituindo a chave "dummy" pela chave real segura no backend
-    const urlObj = new URL(`wss://generativelanguage.googleapis.com${targetUrlPath}`);
-    urlObj.searchParams.set('key', apiKey);
-    
-    console.log(`[WS Proxy] Conectando ao Google Gemini API...`);
-    const geminiWs = new WebSocket(urlObj.toString());
-    
-    // O cliente envia o setup imediatamente, antes da conexão com o Google
-    // completar — bufferiza até o socket upstream abrir para não perder mensagens
-    const pendingMessages = [];
-
-    geminiWs.on('open', () => {
-      console.log('[WS Proxy] Conectado com sucesso ao Gemini');
-      for (const [data, isBinary] of pendingMessages) {
-        geminiWs.send(data, { binary: isBinary });
-      }
-      pendingMessages.length = 0;
+    const ai = new GoogleGenAI({ apiKey, httpOptions: { apiVersion: 'v1alpha' } });
+    const token = await ai.authTokens.create({
+      config: {
+        uses: 1,
+        expireTime: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
+        newSessionExpireTime: new Date(Date.now() + 2 * 60 * 1000).toISOString(),
+      },
     });
 
-    // Encaminha as mensagens do Gemini para o Cliente (Frontend)
-    geminiWs.on('message', (data, isBinary) => {
-      if (clientWs.readyState === WebSocket.OPEN) {
-        clientWs.send(data, { binary: isBinary });
-      }
-    });
-
-    // Encaminha as mensagens do Cliente (Frontend) para o Gemini
-    clientWs.on('message', (data, isBinary) => {
-      if (geminiWs.readyState === WebSocket.OPEN) {
-        geminiWs.send(data, { binary: isBinary });
-      } else if (geminiWs.readyState === WebSocket.CONNECTING) {
-        pendingMessages.push([data, isBinary]);
-      }
-    });
-
-    clientWs.on('close', () => {
-      console.log('[WS Proxy] Cliente desconectou');
-      if (geminiWs.readyState === WebSocket.OPEN) geminiWs.close();
-    });
-
-    geminiWs.on('close', (code, reason) => {
-      console.log(`[WS Proxy] Gemini desconectou (code: ${code}, reason: ${reason?.toString() || 'n/a'})`);
-      if (clientWs.readyState === WebSocket.OPEN) clientWs.close();
-    });
-    
-    geminiWs.on('error', (err) => {
-      console.error('[WS Proxy] Erro no Gemini:', err);
-      if (clientWs.readyState === WebSocket.OPEN) clientWs.close();
-    });
-    
-    clientWs.on('error', (err) => {
-      console.error('[WS Proxy] Erro no Cliente:', err);
-      if (geminiWs.readyState === WebSocket.OPEN) geminiWs.close();
-    });
-  } else {
-    // Rejeita qualquer outra conexão WS
-    clientWs.close();
+    res.json({ token: token.name });
+  } catch (error) {
+    console.error('Erro ao criar token efêmero:', error);
+    res.status(500).json({ error: error.message });
   }
 });
 
+const server = http.createServer(app);
+
+// (Proxy WebSocket removido: o cliente agora conecta direto no Google
+// com token efêmero emitido por /api/live-token)
 // Servir frontend em produção
 app.use(express.static(path.join(__dirname, 'dist')));
 app.get(/.*/, (req, res) => {
@@ -168,8 +114,5 @@ if (isDirectRun) {
     console.log('As chaves de API permanecem apenas no ambiente do servidor.');
   });
 }
-
-// Handle WebSocket upgrade
-// (Already handled internally by the WebSocketServer instance)
 
 export default server;

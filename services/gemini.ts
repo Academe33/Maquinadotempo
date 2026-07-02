@@ -6,17 +6,20 @@ import { Character } from "../types";
 // Use window.location.origin as fallback so it works with Vite proxy in dev, and Express in prod
 const BACKEND_URL = (import.meta as any).env?.VITE_BACKEND_URL || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3001');
 
-// Usa o proxy local para esconder a API Key
-export const getGeminiClient = () => {
-  // A URL base aponta para o proxy local (ex: http://localhost:3000/api/gemini)
-  // O SDK converterá automaticamente http:// para ws:// ao usar o método live.connect()
-  const baseUrl = window.location.protocol + '//' + window.location.host + '/api/gemini';
-  
-  return new GoogleGenAI({ 
-    apiKey: "SECURE_PROXY", // A chave real será injetada pelo backend
-    httpOptions: { 
-      baseUrl 
-    } 
+// Busca um token efêmero no backend e conecta direto no Google.
+// A chave real nunca sai do servidor; o token expira em minutos
+// e vale para uma única sessão Live.
+export const getGeminiClient = async () => {
+  const response = await fetch('/api/live-token', { method: 'POST' });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || 'Falha ao obter token de sessão');
+  }
+  const { token } = await response.json();
+
+  return new GoogleGenAI({
+    apiKey: token,
+    httpOptions: { apiVersion: 'v1alpha' },
   });
 };
 
