@@ -1,7 +1,6 @@
 import express from 'express';
 import { WebSocketServer, WebSocket } from 'ws';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import { GoogleGenAI } from '@google/genai';
 import http from 'http';
 import path from 'path';
@@ -11,28 +10,28 @@ import fs from 'fs';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Carregar variáveis de ambiente (onde estará a GEMINI_API_KEY)
-dotenv.config({ path: '.env.local' });
-dotenv.config();
-
 const app = express();
 app.use(cors());
 app.use(express.json());
 
 const PORT = process.env.PORT || 3001;
-const apiKey = process.env.GEMINI_API_KEY;
 
-if (!apiKey) {
-  console.warn("⚠️ AVISO: GEMINI_API_KEY não está configurada no backend.");
+function getApiKey() {
+  return process.env.GEMINI_API_KEY;
+}
+
+if (!getApiKey()) {
+  console.warn('AVISO: GEMINI_API_KEY nao esta configurada no ambiente do servidor.');
 }
 
 // 1. Endpoint REST seguro para gerar o perfil do personagem
 app.post('/api/generate-character', async (req, res) => {
   try {
     const { query } = req.body;
-    
-    if (!apiKey) throw new Error("API Key não configurada no backend");
-    
+
+    const apiKey = getApiKey();
+    if (!apiKey) throw new Error('API Key nao configurada no ambiente do servidor');
+
     const ai = new GoogleGenAI({ apiKey });
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
@@ -76,6 +75,14 @@ const wss = new WebSocketServer({ server });
 wss.on('connection', (clientWs, req) => {
   // Apenas intercepta conexões que venham da nossa rota proxy configurada
   if (req.url && req.url.startsWith('/api/gemini/ws/')) {
+    const apiKey = getApiKey();
+
+    if (!apiKey) {
+      console.error('[WS Proxy] GEMINI_API_KEY ausente no ambiente do servidor.');
+      clientWs.close(1011, 'Server API key missing');
+      return;
+    }
+
     console.log('[WS Proxy] Nova conexão recebida:', req.url);
     
     // Remove o prefixo do nosso proxy interno
@@ -143,11 +150,16 @@ app.get('/(.*)', (req, res) => {
   }
 });
 
-server.listen(PORT, () => {
-  console.log(`🚀 Backend seguro Node.js rodando na porta ${PORT}`);
-  console.log(`🔒 As chaves de API estão seguras e não são expostas ao cliente.`);
-});
+const isDirectRun = process.argv[1] && path.resolve(process.argv[1]) === __filename;
+
+if (isDirectRun) {
+  server.listen(PORT, () => {
+    console.log(`Backend seguro Node.js rodando na porta ${PORT}`);
+    console.log('As chaves de API permanecem apenas no ambiente do servidor.');
+  });
+}
 
 // Handle WebSocket upgrade
 // (Already handled internally by the WebSocketServer instance)
 
+export default server;
