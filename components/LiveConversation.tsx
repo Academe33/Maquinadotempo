@@ -99,7 +99,7 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
         gainNode.connect(outputCtx.destination);
         gainNodeRef.current = gainNode;
 
-        const ai = getGeminiClient();
+        const ai = await getGeminiClient();
         const sessionPromise = ai.live.connect({
           model: 'gemini-2.5-flash-native-audio-preview-12-2025',
           callbacks: {
