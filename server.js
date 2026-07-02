@@ -34,7 +34,7 @@ app.post('/api/generate-character', async (req, res) => {
 
     const ai = new GoogleGenAI({ apiKey });
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-2.5-flash',
       contents: `Crie um perfil detalhado para o personagem ou tutor: "${query}". Retorne em formato JSON.`,
       config: {
         responseMimeType: "application/json",
@@ -96,31 +96,41 @@ wss.on('connection', (clientWs, req) => {
     console.log(`[WS Proxy] Conectando ao Google Gemini API...`);
     const geminiWs = new WebSocket(urlObj.toString());
     
+    // O cliente envia o setup imediatamente, antes da conexão com o Google
+    // completar — bufferiza até o socket upstream abrir para não perder mensagens
+    const pendingMessages = [];
+
     geminiWs.on('open', () => {
       console.log('[WS Proxy] Conectado com sucesso ao Gemini');
+      for (const [data, isBinary] of pendingMessages) {
+        geminiWs.send(data, { binary: isBinary });
+      }
+      pendingMessages.length = 0;
     });
-    
+
     // Encaminha as mensagens do Gemini para o Cliente (Frontend)
     geminiWs.on('message', (data, isBinary) => {
       if (clientWs.readyState === WebSocket.OPEN) {
         clientWs.send(data, { binary: isBinary });
       }
     });
-    
+
     // Encaminha as mensagens do Cliente (Frontend) para o Gemini
     clientWs.on('message', (data, isBinary) => {
       if (geminiWs.readyState === WebSocket.OPEN) {
         geminiWs.send(data, { binary: isBinary });
+      } else if (geminiWs.readyState === WebSocket.CONNECTING) {
+        pendingMessages.push([data, isBinary]);
       }
     });
-    
+
     clientWs.on('close', () => {
       console.log('[WS Proxy] Cliente desconectou');
       if (geminiWs.readyState === WebSocket.OPEN) geminiWs.close();
     });
-    
-    geminiWs.on('close', () => {
-      console.log('[WS Proxy] Gemini desconectou');
+
+    geminiWs.on('close', (code, reason) => {
+      console.log(`[WS Proxy] Gemini desconectou (code: ${code}, reason: ${reason?.toString() || 'n/a'})`);
       if (clientWs.readyState === WebSocket.OPEN) clientWs.close();
     });
     
@@ -141,7 +151,7 @@ wss.on('connection', (clientWs, req) => {
 
 // Servir frontend em produção
 app.use(express.static(path.join(__dirname, 'dist')));
-app.get('/(.*)', (req, res) => {
+app.get(/.*/, (req, res) => {
   const distPath = path.join(__dirname, 'dist', 'index.html');
   if (fs.existsSync(distPath)) {
     res.sendFile(distPath);

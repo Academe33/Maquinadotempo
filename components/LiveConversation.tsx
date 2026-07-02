@@ -40,6 +40,7 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
 
   const cleanup = useCallback(() => {
     if (sessionRef.current) {
+      try { sessionRef.current.close(); } catch { /* sessão já encerrada */ }
       sessionRef.current = null;
     }
     if (streamRef.current) {
@@ -128,7 +129,7 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
               muteNode.connect(inputCtx.destination);
             },
             onmessage: async (message: LiveServerMessage) => {
-              const base64Audio = message.serverContent?.modelTurn?.parts[0]?.inlineData?.data;
+              const base64Audio = message.serverContent?.modelTurn?.parts?.[0]?.inlineData?.data;
               if (base64Audio && outputAudioContextRef.current) {
                 const ctx = outputAudioContextRef.current;
                 nextStartTimeRef.current = Math.max(nextStartTimeRef.current, ctx.currentTime);
@@ -198,17 +199,29 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
           },
         });
 
-        sessionRef.current = await sessionPromise;
-        
+        const session = await sessionPromise;
+        if (cancelled) {
+          session.close();
+          return;
+        }
+        sessionRef.current = session;
+
         // Trigger the model to speak first
-        await sessionRef.current.send([{ text: "Olá, quem é você?" }], true);
+        session.sendClientContent({
+          turns: [{ role: 'user', parts: [{ text: 'Olá, quem é você?' }] }],
+          turnComplete: true,
+        });
       } catch (err) {
         console.error("Failed to start session:", err);
       }
     };
 
+    let cancelled = false;
     initSession();
-    return () => cleanup();
+    return () => {
+      cancelled = true;
+      cleanup();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [character]);
 
