@@ -1,41 +1,41 @@
 
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenAI } from "@google/genai";
 import { Character } from "../types";
 
-// Always use the API key directly from process.env.GEMINI_API_KEY (preferred) or process.env.API_KEY and initialize as a named parameter
+// Determine the base URL for the backend
+// Use window.location.origin as fallback so it works with Vite proxy in dev, and Express in prod
+const BACKEND_URL = (import.meta as any).env?.VITE_BACKEND_URL || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3001');
+
+// Usa o proxy local para esconder a API Key
 export const getGeminiClient = () => {
-  return new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || process.env.API_KEY });
+  // A URL base aponta para o proxy local (ex: http://localhost:3000/api/gemini)
+  // O SDK converterá automaticamente http:// para ws:// ao usar o método live.connect()
+  const baseUrl = window.location.protocol + '//' + window.location.host + '/api/gemini';
+  
+  return new GoogleGenAI({ 
+    apiKey: "SECURE_PROXY", // A chave real será injetada pelo backend
+    httpOptions: { 
+      baseUrl 
+    } 
+  });
 };
 
 export const generateCharacterProfile = async (query: string): Promise<Character> => {
-  const ai = getGeminiClient();
-  const response = await ai.models.generateContent({
-    model: 'gemini-3-flash-preview',
-    contents: `Crie um perfil detalhado para o personagem ou tutor: "${query}". Retorne em formato JSON.`,
-    config: {
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: Type.OBJECT,
-        properties: {
-          name: { type: Type.STRING },
-          title: { type: Type.STRING },
-          description: { type: Type.STRING },
-          systemInstruction: { type: Type.STRING, description: 'Instrução de sistema detalhada para a IA agir como este personagem em primeira pessoa' },
-          voiceName: { type: Type.STRING, enum: ['Puck', 'Charon', 'Kore', 'Fenrir', 'Zephyr'] }
-        },
-        required: ["name", "title", "description", "systemInstruction", "voiceName"]
-      }
-    }
+  // Chama a nossa API REST no Node.js
+  const response = await fetch('/api/generate-character', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ query })
   });
 
-  // The GenerateContentResponse object features a text property (not a method)
-  const data = JSON.parse(response.text || "{}");
-  return {
-    ...data,
-    id: `dynamic-${Date.now()}`,
-    image: `https://picsum.photos/seed/${encodeURIComponent(data.name)}/300/300`,
-    category: 'CUSTOM'
-  };
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || 'Falha ao gerar personagem');
+  }
+
+  return await response.json();
 };
 
 // Audio Helpers - Implementing manually following the provided examples to avoid external library issues
