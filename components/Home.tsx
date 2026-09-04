@@ -1,20 +1,23 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { MousePointerClick, Radar, Mic } from 'lucide-react';
+import { Volume2, VolumeX } from 'lucide-react';
 import { Character } from '../types';
 import { useCharacters } from '../contexts/CharacterContext';
 import { PRESENT_YEAR } from '../services/era';
+import { HOME_LINES } from '../services/voiceLines';
+import { fetchVoice, prefetchVoices, playBufferElement, Playback } from '../services/tts';
 import CharacterCard from './CharacterCard';
 import LiveConversation from './LiveConversation';
 import TimeMachineIntro from './TimeMachine/TimeMachineIntro';
 import AmbientWarp from './TimeMachine/AmbientWarp';
 import Logo from './Logo';
 
-const STEPS = [
-  { icon: MousePointerClick, title: 'Escolha o viajante', text: 'Toque em quem você quer conhecer.' },
-  { icon: Radar, title: 'A máquina cruza os séculos', text: 'Ela localiza a pessoa no passado e a traz até aqui.' },
-  { icon: Mic, title: 'Converse por voz', text: 'A pessoa chega, se apresenta e responde ao vivo.' },
-];
+// Rótulo do setor sem o emoji ("📐 MATEMÁTICA" → "MATEMÁTICA")
+const sectorLabel = (category: string) => category.replace(/^[^\p{L}\p{N}]+/u, '').trim();
+
+const readSoundPref = () => {
+  try { return localStorage.getItem('tm-narration') !== 'off'; } catch { return true; }
+};
 
 const Home: React.FC = () => {
   const { characters } = useCharacters();
@@ -24,6 +27,53 @@ const Home: React.FC = () => {
 
   const categories = useMemo(() => Array.from(new Set(characters.map(c => c.category))), [characters]);
   const [selectedCategory, setSelectedCategory] = useState<string>(categories[0]);
+
+  // Narração da tela inicial (voz da máquina): boas-vindas no primeiro toque
+  // e anúncio do setor ao trocar. Pode ser desligada e a escolha fica salva.
+  const [narrationOn, setNarrationOn] = useState(readSoundPref);
+  const narrationRef = useRef(narrationOn);
+  const welcomedRef = useRef(false);
+  const playbackRef = useRef<Playback | null>(null);
+
+  useEffect(() => {
+    narrationRef.current = narrationOn;
+    try { localStorage.setItem('tm-narration', narrationOn ? 'on' : 'off'); } catch { /* sem storage */ }
+    if (!narrationOn) playbackRef.current?.stop();
+  }, [narrationOn]);
+
+  useEffect(() => {
+    prefetchVoices('machine', [HOME_LINES.welcome, ...categories.map(c => HOME_LINES.sector(sectorLabel(c)))]);
+  }, [categories]);
+
+  const narrate = useCallback(async (text: string) => {
+    if (!narrationRef.current) return;
+    try {
+      const buffer = await fetchVoice('machine', text);
+      if (!narrationRef.current) return;
+      playbackRef.current?.stop();
+      playbackRef.current = playBufferElement(buffer, 0.9);
+    } catch (err) {
+      console.warn('Narração indisponível:', (err as Error).message);
+    }
+  }, []);
+
+  // Navegadores só tocam áudio depois de um gesto: a primeira interação que
+  // não for escolher um viajante dispara as boas-vindas.
+  const handleFirstInteraction = (e: React.PointerEvent) => {
+    if (welcomedRef.current) return;
+    if ((e.target as HTMLElement).closest('[data-card]')) return;
+    welcomedRef.current = true;
+    narrate(HOME_LINES.welcome);
+  };
+
+  const handleSelectCategory = (cat: string) => {
+    if (cat === selectedCategory) return;
+    setSelectedCategory(cat);
+    welcomedRef.current = true;
+    narrate(HOME_LINES.sector(sectorLabel(cat)));
+  };
+
+  useEffect(() => () => playbackRef.current?.stop(), []);
 
   useEffect(() => {
     if (!categories.includes(selectedCategory) && categories.length > 0) {
@@ -37,6 +87,7 @@ const Home: React.FC = () => {
   );
 
   const handleSelectCharacter = (char: Character) => {
+    playbackRef.current?.stop();
     setHasArrived(false);
     setSelectedCharacter(char);
   };
@@ -46,8 +97,7 @@ const Home: React.FC = () => {
     setHasArrived(false);
   };
 
-  // Rótulo do setor sem o emoji ("📐 MATEMÁTICA" → "MATEMÁTICA")
-  const sectorName = selectedCategory?.replace(/^[^\p{L}\p{N}]+/u, '') ?? '';
+  const sectorName = selectedCategory ? sectorLabel(selectedCategory) : '';
 
   return (
     <>
@@ -56,6 +106,7 @@ const Home: React.FC = () => {
           <motion.div
             key="home"
             className="min-h-screen text-white relative"
+            onPointerDownCapture={handleFirstInteraction}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0, scale: 1.04, filter: 'blur(10px)', transition: { duration: 0.55 } }}
@@ -73,6 +124,16 @@ const Home: React.FC = () => {
                 <span className="hidden sm:inline border border-purple-500/30 bg-black/40 rounded-full px-3 py-1.5">
                   ANO {PRESENT_YEAR}
                 </span>
+                <button
+                  type="button"
+                  onClick={() => setNarrationOn(v => !v)}
+                  aria-pressed={narrationOn}
+                  title={narrationOn ? 'Desligar narração da máquina' : 'Ligar narração da máquina'}
+                  className={`flex items-center gap-1.5 border rounded-full px-2.5 py-1.5 transition-colors ${narrationOn ? 'border-cyan-400/40 text-cyan-200 bg-black/40 hover:bg-cyan-400/10' : 'border-white/15 text-slate-500 bg-black/40 hover:text-slate-300'}`}
+                >
+                  {narrationOn ? <Volume2 size={13} /> : <VolumeX size={13} />}
+                  <span className="hidden md:inline">NARRAÇÃO</span>
+                </button>
               </div>
             </header>
 
@@ -104,28 +165,6 @@ const Home: React.FC = () => {
                 e trazê-lo para uma conversa por voz, ao vivo, com você.
               </motion.p>
 
-              {/* Como funciona */}
-              <motion.ol
-                className="mt-10 md:mt-12 grid grid-cols-3 gap-2 md:gap-4 max-w-3xl mx-auto"
-                initial="hidden"
-                animate="show"
-                variants={{ show: { transition: { staggerChildren: 0.12, delayChildren: 0.5 } } }}
-              >
-                {STEPS.map((step, i) => (
-                  <motion.li
-                    key={step.title}
-                    variants={{ hidden: { opacity: 0, y: 14 }, show: { opacity: 1, y: 0 } }}
-                    className="relative bg-[#0d0a18]/70 border border-purple-500/15 rounded-2xl px-2 py-3 md:px-4 md:py-4 text-center"
-                  >
-                    <span className="absolute -top-2 left-1/2 -translate-x-1/2 font-sci text-[9px] tracking-widest bg-purple-600 text-white rounded-full px-2 py-0.5">
-                      0{i + 1}
-                    </span>
-                    <step.icon className="mx-auto mt-1 mb-2 text-cyan-300" size={20} />
-                    <p className="text-[11px] md:text-sm font-semibold leading-tight">{step.title}</p>
-                    <p className="hidden md:block text-xs text-slate-400 mt-1 leading-snug">{step.text}</p>
-                  </motion.li>
-                ))}
-              </motion.ol>
             </section>
 
             {/* Seleção */}
@@ -147,7 +186,7 @@ const Home: React.FC = () => {
                       key={cat}
                       role="tab"
                       aria-selected={active}
-                      onClick={() => setSelectedCategory(cat)}
+                      onClick={() => handleSelectCategory(cat)}
                       className={`relative px-3.5 py-2 rounded-full text-xs font-medium whitespace-nowrap flex-shrink-0 snap-center transition-colors duration-300 ${
                         active ? 'text-white' : 'text-gray-400 hover:text-white'
                       }`}

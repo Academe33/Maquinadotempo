@@ -368,6 +368,25 @@ export class TimeMachineAudio {
     }
   }
 
+  /** Toca uma fala (MP3) pelo master da máquina, para o fade-out valer para ela também */
+  async playVoice(buffer: ArrayBuffer, volume = 1): Promise<{ done: Promise<void>; stop: () => void }> {
+    if (!this.ctx || !this.master) throw new Error('Áudio indisponível');
+    const ctx = this.ctx;
+    const audioBuffer = await ctx.decodeAudioData(buffer);
+    const source = ctx.createBufferSource();
+    source.buffer = audioBuffer;
+    const gain = ctx.createGain();
+    gain.gain.value = volume;
+    source.connect(gain);
+    gain.connect(this.master);
+    let finish: () => void = () => undefined;
+    const done = new Promise<void>(resolve => { finish = resolve; });
+    source.addEventListener('ended', () => { this.live.delete(source); finish(); }, { once: true });
+    source.start();
+    this.track(source);
+    return { done, stop: () => { try { source.stop(); } catch { /* já parou */ } finish(); } };
+  }
+
   /** Reduz tudo a zero e fecha o contexto */
   fadeOut(seconds = 1.2) {
     if (!this.ctx || !this.master) return;

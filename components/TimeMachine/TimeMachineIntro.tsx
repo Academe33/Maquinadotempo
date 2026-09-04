@@ -4,6 +4,8 @@ import { Character } from '../../types';
 import { parseEra, formatYear, PRESENT_YEAR } from '../../services/era';
 import { TimeMachineAudio } from '../../services/timeMachineSfx';
 import { speakAsMachine, cancelMachineSpeech, warmUpVoices } from '../../services/timeMachineVoice';
+import { machineLines, arrivalLine, characterVoiceKey } from '../../services/voiceLines';
+import { prefetchVoices, VoiceKey } from '../../services/tts';
 import WarpCanvas, { WarpControls } from './WarpCanvas';
 import './timeMachine.css';
 
@@ -61,7 +63,7 @@ const TimeMachineIntro: React.FC<TimeMachineIntroProps> = ({ character, onComple
 
   const era = parseEra(character.description);
   const yearsCrossed = Math.abs(PRESENT_YEAR - era.targetYear);
-  const spokenYear = era.bc ? `${Math.abs(era.targetYear)} antes de Cristo` : `${era.targetYear}`;
+  const lines = machineLines(character);
 
   // Anéis giram com velocidade proporcional à intensidade do vórtice
   useEffect(() => {
@@ -91,6 +93,9 @@ const TimeMachineIntro: React.FC<TimeMachineIntroProps> = ({ character, onComple
     const anims: AnimationPlaybackControls[] = [];
     const timers: number[] = [];
     warmUpVoices();
+    // Baixa (ou gera) as falas desta viagem enquanto a máquina liga
+    prefetchVoices('machine', Object.values(lines));
+    prefetchVoices(characterVoiceKey(character) as VoiceKey, [arrivalLine(character)]);
 
     const guard = () => {
       if (cancelled) throw new Error('cancelled');
@@ -101,7 +106,7 @@ const TimeMachineIntro: React.FC<TimeMachineIntroProps> = ({ character, onComple
     };
     const say = async (text: string, minMs: number) => {
       setMachineLine(text);
-      await Promise.all([speakAsMachine(text), wait(minMs)]);
+      await Promise.all([speakAsMachine(text, { audio }), wait(minMs)]);
       guard();
     };
     const runOdometer = (from: number, to: number, duration: number) => {
@@ -148,7 +153,7 @@ const TimeMachineIntro: React.FC<TimeMachineIntroProps> = ({ character, onComple
       audio.sonar(1.1);
       audio.sonar(2.2);
       pushLog(`RASTREANDO: ${character.name.toUpperCase()}`);
-      await say(`Máquina do tempo ativada. Localizando ${character.name}.`, 2600);
+      await say(lines.scan, 2600);
 
       // ---------- 3. CALIBRANDO ----------
       setPhase('calibrate');
@@ -158,7 +163,7 @@ const TimeMachineIntro: React.FC<TimeMachineIntroProps> = ({ character, onComple
       audio.beep(1760, 0.25, 'sine', 0.1, 0.18);
       pushLog(`ALVO LOCALIZADO · ANO ${era.label}`);
       runOdometer(PRESENT_YEAR, era.targetYear, 2.4);
-      await say(`Alvo localizado. Destino: ano ${spokenYear}.`, 2800);
+      await say(lines.calibrate, 2800);
 
       // ---------- 4. CARREGANDO ----------
       setPhase('charge');
@@ -175,7 +180,7 @@ const TimeMachineIntro: React.FC<TimeMachineIntroProps> = ({ character, onComple
           },
         })
       );
-      await say(`Abrindo portal. Trazendo ${character.name} em três, dois, um.`, 3800);
+      await say(lines.charge, 3800);
 
       // ---------- 5. VIAGEM ----------
       setPhase('travel');
@@ -199,7 +204,7 @@ const TimeMachineIntro: React.FC<TimeMachineIntroProps> = ({ character, onComple
       anims.push(animate(1, 0, { duration: 1.4, ease: 'easeOut', onUpdate: v => { controls.flash = v; } }));
       anims.push(animate(1, 0.12, { duration: 2.6, ease: 'easeOut', onUpdate: v => { controls.intensity = v; } }));
       pushLog('TRANSFERÊNCIA CONCLUÍDA');
-      await say(`Transferência concluída. ${character.name} chegou.`, 2400);
+      await say(lines.arrival, 2400);
 
       finishedRef.current = true;
       audio.fadeOut(1.2);

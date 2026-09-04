@@ -1,24 +1,29 @@
-// Voz da Máquina do Tempo (o "computador de bordo"), usando a Web Speech API
-// do navegador. Sem custo, sem rede, e com timbre robótico que combina com a
-// cena. Cada fala retorna uma Promise que resolve ao terminar (ou por timeout,
-// porque alguns navegadores não disparam `onend` de forma confiável).
+// Voz da Máquina do Tempo (o "computador de bordo").
+//
+// Primeiro tenta a voz de alta qualidade gerada no ElevenLabs (com cache em
+// memória, arquivo estático e servidor). Se a voz não puder ser obtida —
+// sem chave, sem rede, créditos esgotados — cai no sintetizador do navegador
+// (Web Speech API), que é gratuito e funciona offline.
+
+import { fetchVoice, playBufferElement, Playback } from './tts';
+import type { TimeMachineAudio } from './timeMachineSfx';
 
 const hasSpeech = typeof window !== 'undefined' && 'speechSynthesis' in window;
 
 let cachedVoice: SpeechSynthesisVoice | null | undefined;
+let current: Playback | null = null;
 
 function pickVoice(): SpeechSynthesisVoice | null {
   if (!hasSpeech) return null;
   if (cachedVoice !== undefined) return cachedVoice;
   const voices = window.speechSynthesis.getVoices();
-  if (voices.length === 0) return null; // ainda carregando; tenta de novo depois
+  if (voices.length === 0) return null;
 
   const score = (v: SpeechSynthesisVoice) => {
     const lang = v.lang.toLowerCase().replace('_', '-');
     let s = 0;
     if (lang === 'pt-br') s += 10;
     else if (lang.startsWith('pt')) s += 5;
-    // Vozes "premium" costumam soar melhor
     if (/google|premium|enhanced|natural|neural/i.test(v.name)) s += 2;
     if (/luciana|felipe|francisca|antonio|camila|thalita/i.test(v.name)) s += 1;
     return s;
@@ -29,7 +34,7 @@ function pickVoice(): SpeechSynthesisVoice | null {
   return cachedVoice;
 }
 
-/** Pré-aquece a lista de vozes (alguns navegadores carregam de forma assíncrona). */
+/** Pré-aquece a lista de vozes do navegador (fallback). */
 export function warmUpVoices() {
   if (!hasSpeech) return;
   pickVoice();
@@ -39,28 +44,15 @@ export function warmUpVoices() {
   }, { once: true });
 }
 
-export interface SpeakOptions {
-  rate?: number;
-  pitch?: number;
-  volume?: number;
-  /** Tempo máximo de espera, em ms (proteção contra `onend` que nunca chega) */
-  maxMs?: number;
-}
-
 function estimateMs(text: string, rate: number) {
-  // ~ 14 caracteres por segundo em pt-BR na velocidade 1.0
   return Math.max(800, (text.length / 14) * 1000 / rate + 600);
 }
 
-export function speakAsMachine(text: string, opts: SpeakOptions = {}): Promise<void> {
-  const rate = opts.rate ?? 1.06;
+function speakWithBrowser(text: string): Promise<void> {
+  const rate = 1.06;
   const estimated = estimateMs(text, rate);
-  const maxMs = opts.maxMs ?? estimated * 1.15 + 800;
-
-  // Sem síntese de voz: resolve rápido, a animação segue o tempo mínimo visual
-  if (!hasSpeech) {
-    return new Promise(resolve => setTimeout(resolve, 300));
-  }
+  const maxMs = estimated * 1.15 + 800;
+  if (!hasSpeech) return new Promise(resolve => setTimeout(resolve, 300));
 
   return new Promise(resolve => {
     let done = false;
@@ -73,23 +65,18 @@ export function speakAsMachine(text: string, opts: SpeakOptions = {}): Promise<v
       resolve();
     };
     const timer = setTimeout(finish, maxMs);
-    // Se a fala não começar logo (sem vozes instaladas, síntese bloqueada),
-    // não segura a animação esperando por ela
     const startTimer = setTimeout(() => { if (!started) finish(); }, 1500);
 
     const utter = new SpeechSynthesisUtterance(text);
     utter.lang = 'pt-BR';
     utter.rate = rate;
-    utter.pitch = opts.pitch ?? 0.65; // mais grave: soa como computador de bordo
-    utter.volume = opts.volume ?? 1;
+    utter.pitch = 0.65;
     const voice = pickVoice();
     if (voice) utter.voice = voice;
     utter.onstart = () => { started = true; };
     utter.onend = finish;
     utter.onerror = finish;
-
     try {
-      // Chrome às vezes fica "pausado" depois de um cancel(); garante retomada
       window.speechSynthesis.resume();
       window.speechSynthesis.speak(utter);
     } catch {
@@ -98,7 +85,38 @@ export function speakAsMachine(text: string, opts: SpeakOptions = {}): Promise<v
   });
 }
 
+export interface MachineSpeakOptions {
+  /** Toca pelo master da máquina (fade-out e compressor incluídos) */
+  audio?: TimeMachineAudio | null;
+}
+
+/**
+ * Fala como a máquina. Resolve quando a fala termina.
+ * ElevenLabs primeiro; Web Speech como plano B.
+ */
+export async function speakAsMachine(text: string, opts: MachineSpeakOptions = {}): Promise<void> {
+  cancelMachineSpeech();
+  try {
+    const buffer = await fetchVoice('machine', text);
+    const playback = opts.audio?.available
+      ? await opts.audio.playVoice(buffer)
+      : playBufferElement(buffer);
+    current = playback;
+    await playback.done;
+    if (current === playback) current = null;
+    return;
+  } catch (err) {
+    console.warn('Voz ElevenLabs indisponível, usando o sintetizador do navegador:', (err as Error).message);
+  }
+  await speakWithBrowser(text);
+}
+
 export function cancelMachineSpeech() {
-  if (!hasSpeech) return;
-  try { window.speechSynthesis.cancel(); } catch { /* ignora */ }
+  if (current) {
+    current.stop();
+    current = null;
+  }
+  if (hasSpeech) {
+    try { window.speechSynthesis.cancel(); } catch { /* ignora */ }
+  }
 }

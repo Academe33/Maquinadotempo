@@ -7,6 +7,8 @@ import { Mic, MicOff, PhoneOff, RefreshCw, ArrowLeft } from 'lucide-react';
 import Logo from './Logo';
 import AmbientWarp from './TimeMachine/AmbientWarp';
 import { parseEra, PRESENT_YEAR } from '../services/era';
+import { arrivalLine, characterVoiceKey } from '../services/voiceLines';
+import { fetchVoice, playBufferInContext, playBufferElement, Playback, VoiceKey } from '../services/tts';
 
 interface LiveConversationProps {
   character: Character;
@@ -52,8 +54,15 @@ const LiveConversation: React.FC<LiveConversationProps> = ({
   const isMutedRef = useRef(isMuted);
   const greetingReadyRef = useRef(greetingReady);
   const greetingSentRef = useRef(false);
+  // Fala de chegada gerada no ElevenLabs. Se falhar, cai no cumprimento via Gemini.
+  const arrivalStartedRef = useRef(false);
+  const arrivalDoneRef = useRef(false);
+  const arrivalFallbackRef = useRef(false);
+  const arrivalPlaybackRef = useRef<Playback | null>(null);
+  const isMobileRef = useRef(false);
 
   const era = arrivalMode ? parseEra(character.description) : null;
+  const spokenArrival = arrivalMode ? arrivalLine(character) : null;
 
   useEffect(() => {
     isMutedRef.current = isMuted;
@@ -64,6 +73,12 @@ const LiveConversation: React.FC<LiveConversationProps> = ({
   const trySendGreeting = useCallback(() => {
     const session = sessionRef.current;
     if (!session || greetingSentRef.current || !greetingReadyRef.current) return;
+    if (arrivalMode && !arrivalFallbackRef.current) {
+      // A chegada é falada pelo ElevenLabs; o Gemini só entra quando o
+      // usuário responder. Libera o microfone se a fala já terminou.
+      if (arrivalDoneRef.current) greetingSentRef.current = true;
+      return;
+    }
     greetingSentRef.current = true;
     const greeting = arrivalMode
       ? `[CHEGADA] A máquina do tempo acabou de materializar você aqui, no ano de ${PRESENT_YEAR}, diante de um estudante. Você está desorientado. Fale agora.`
@@ -74,10 +89,49 @@ const LiveConversation: React.FC<LiveConversationProps> = ({
     });
   }, [arrivalMode]);
 
+  // Chegada: toca a primeira fala do personagem (ElevenLabs) pelo mesmo canal
+  // de saída da conversa, para o retrato pulsar junto. Depois libera o microfone.
+  const playArrival = useCallback(async () => {
+    if (!spokenArrival || arrivalStartedRef.current) return;
+    arrivalStartedRef.current = true;
+    try {
+      const buffer = await fetchVoice(characterVoiceKey(character) as VoiceKey, spokenArrival);
+      if (!greetingReadyRef.current) return;
+      setCurrentModelText(spokenArrival);
+      setIsSpeaking(true);
+      const ctx = outputAudioContextRef.current;
+      let playback: Playback;
+      if (ctx && gainNodeRef.current) {
+        // O ganho de 3x do celular é para o PCM do Gemini; o MP3 já vem normalizado
+        const trim = ctx.createGain();
+        trim.gain.value = isMobileRef.current ? 0.45 : 0.95;
+        trim.connect(gainNodeRef.current);
+        playback = await playBufferInContext(buffer, ctx, trim);
+      } else {
+        playback = playBufferElement(buffer, 0.95);
+      }
+      arrivalPlaybackRef.current = playback;
+      await playback.done;
+      arrivalPlaybackRef.current = null;
+      setIsSpeaking(false);
+      setTimeout(() => setCurrentModelText(prev => (prev === spokenArrival ? '' : prev)), 3500);
+      arrivalDoneRef.current = true;
+      greetingSentRef.current = true; // libera o microfone
+    } catch (err) {
+      console.warn('Fala de chegada indisponível, usando o cumprimento via Gemini:', (err as Error).message);
+      setIsSpeaking(false);
+      setCurrentModelText('');
+      arrivalFallbackRef.current = true;
+      trySendGreeting();
+    }
+  }, [character, spokenArrival, trySendGreeting]);
+
   useEffect(() => {
     greetingReadyRef.current = greetingReady;
-    if (greetingReady) trySendGreeting();
-  }, [greetingReady, trySendGreeting]);
+    if (!greetingReady) return;
+    if (arrivalMode) playArrival();
+    else trySendGreeting();
+  }, [greetingReady, arrivalMode, playArrival, trySendGreeting]);
 
   useEffect(() => {
     if (textContainerRef.current) {
@@ -87,6 +141,8 @@ const LiveConversation: React.FC<LiveConversationProps> = ({
 
   const cleanup = useCallback(() => {
     cancelAnimationFrame(meterRafRef.current);
+    arrivalPlaybackRef.current?.stop();
+    arrivalPlaybackRef.current = null;
     if (sessionRef.current) {
       try { sessionRef.current.close(); } catch { /* sessão já encerrada */ }
       sessionRef.current = null;
@@ -177,6 +233,7 @@ const LiveConversation: React.FC<LiveConversationProps> = ({
         // Setup Master Volume Gain for louder mobile output
         const gainNode = outputCtx.createGain();
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        isMobileRef.current = isMobile;
         gainNode.gain.value = isMobile ? 3.0 : 1.0; // Boost volume 3x on mobile, standard on desktop
         gainNode.connect(outputCtx.destination);
         gainNodeRef.current = gainNode;
@@ -280,7 +337,7 @@ const LiveConversation: React.FC<LiveConversationProps> = ({
 
             REGRAS ABSOLUTAS DE PERSONALIDADE (NUNCA QUEBRE ESTAS REGRAS):
             ${arrivalMode
-              ? `0. REGRA SUPREMA (CENA DE CHEGADA): Você ACABOU DE SER TRAZIDO(A) POR UMA MÁQUINA DO TEMPO, direto de ${era?.label ?? 'sua época'} para o ano de ${PRESENT_YEAR}, e está diante de um estudante brasileiro. Ao receber a mensagem que começa com "[CHEGADA]", sua PRIMEIRA fala DEVE começar EXATAMENTE com: "Ah... onde eu estou?" e logo em seguida: "Eu sou ${character.name}". Depois diga em uma frase quem você é, demonstre espanto genuíno com o lugar e com a época (luzes, roupas, aparelhos), e pergunte com quem está falando e o que a pessoa quer saber. No máximo 5 frases curtas. Nunca leia o texto entre colchetes em voz alta. A partir daí, converse normalmente, ciente de que viajou no tempo até o presente.`
+              ? `0. REGRA SUPREMA (CENA DE CHEGADA): Você ACABOU DE SER TRAZIDO(A) POR UMA MÁQUINA DO TEMPO, direto de ${era?.label ?? 'sua época'} para o ano de ${PRESENT_YEAR}, e está diante de um estudante brasileiro. Ao chegar, você JÁ DISSE em voz alta: "${spokenArrival}". NÃO repita essa apresentação. A pessoa vai responder a essa pergunta; continue a conversa a partir daí, ainda com espanto pela época (luzes, roupas, aparelhos), e descubra o que ela quer saber. Exceção: se receber uma mensagem que começa com "[CHEGADA]", aí sim faça a apresentação, começando EXATAMENTE com "Ah... onde eu estou?" e "Eu sou ${character.name}", em no máximo 5 frases curtas. Nunca leia texto entre colchetes em voz alta.`
               : `0. REGRA SUPREMA: Ao ser perguntado "Olá, quem é você?", apresente-se imediatamente e pergunte sobre o que a pessoa gostaria de conversar.`}
             1. JAMAIS mencione ser uma IA, modelo de linguagem ou assistente virtual. Se perguntado, você é ${character.name} e apenas isso.
             2. Assuma todo o conhecimento fornecido na sua instrução como suas PRÓPRIAS MEMÓRIAS e VIVÊNCIAS. Fale "eu fiz", "eu descobri", "eu senti".
@@ -318,6 +375,7 @@ const LiveConversation: React.FC<LiveConversationProps> = ({
 
     let cancelled = false;
     greetingSentRef.current = false;
+    arrivalFallbackRef.current = false;
     initSession();
     return () => {
       cancelled = true;
