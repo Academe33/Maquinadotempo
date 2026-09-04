@@ -4,7 +4,8 @@
 //    ou salvo pelo servidor de desenvolvimento em public/voices);
 // 3. POST /api/tts, que gera no ElevenLabs e guarda em disco no servidor.
 
-export type VoiceKey = 'machine' | 'Puck' | 'Charon' | 'Kore' | 'Fenrir' | 'Zephyr';
+// Só o computador de bordo tem voz gerada; os personagens falam pelo Gemini Live.
+export type VoiceKey = 'machine';
 
 const VOICE_VERSION = 'v1'; // precisa bater com services/ttsServer.js
 

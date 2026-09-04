@@ -1,4 +1,6 @@
-// Falas fixas do app (máquina do tempo e chegada dos personagens).
+// Falas fixas do app (computador de bordo da máquina do tempo e narração da
+// home). A voz dos personagens é sempre a do motor de IA (Gemini Live),
+// inclusive na primeira fala ao chegar.
 // Centralizadas aqui para que o app e o script de pré-geração usem
 // exatamente o mesmo texto — e portanto o mesmo arquivo em cache.
 
@@ -27,20 +29,10 @@ export const machineLines = (c: VoiceLineCharacter) => {
   };
 };
 
-/** Primeira fala do personagem ao chegar no presente */
-export const arrivalLine = (c: VoiceLineCharacter) => {
-  const year = spokenYear(c.description);
-  const title = c.title.split(',')[0].trim().toLowerCase();
-  return `Ah... onde eu estou? Eu sou ${c.name}, ${title}. Há um instante eu estava no ano de ${year}... e agora, que luzes são essas? Com quem estou falando?`;
-};
-
 /** Falas da tela inicial */
 export const HOME_LINES = {
   welcome: `Bem-vindo à Máquina do Tempo. Escolha um viajante e eu vou buscá-lo no passado.`,
   sector: (sector: string) => `Setor: ${sector}.`,
 };
-
-/** Chave de voz ElevenLabs para um personagem (mapeada a partir da voz Gemini) */
-export const characterVoiceKey = (c: VoiceLineCharacter) => c.voiceName || 'Zephyr';
 
 export { PRESENT_YEAR };

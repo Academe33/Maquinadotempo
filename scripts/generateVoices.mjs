@@ -7,14 +7,14 @@
 //   npm run voices:generate -- --id albert-einstein --id pitagoras
 //   npm run voices:generate -- --dry-run    → só mostra o que seria gerado e o custo
 //
-// Cada personagem custa ~300 caracteres de crédito (4 falas da máquina + 1 de
-// chegada). Confira o saldo do plano antes de gerar os 96 de uma vez.
+// Cada personagem custa ~150 caracteres de crédito (4 falas da máquina).
+// Confira o saldo do plano antes de gerar os 96 de uma vez.
 
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { synthesize, cachedPath, getApiKey, getCacheDir } from '../services/ttsServer.js';
-import { machineLines, arrivalLine, HOME_LINES, characterVoiceKey } from '../services/voiceLines.ts';
+import { machineLines, HOME_LINES } from '../services/voiceLines.ts';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const args = process.argv.slice(2);
@@ -55,7 +55,6 @@ if (!homeOnly) {
   for (const c of chars) {
     const lines = machineLines(c);
     for (const [k, text] of Object.entries(lines)) jobs.push({ voice: 'machine', text, label: `${c.id}/${k}` });
-    jobs.push({ voice: characterVoiceKey(c), text: arrivalLine(c), label: `${c.id}/chegada` });
   }
 }
 

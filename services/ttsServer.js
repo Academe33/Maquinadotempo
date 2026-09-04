@@ -20,24 +20,18 @@ export const ELEVEN_MODEL = 'eleven_multilingual_v2';
 export const OUTPUT_FORMAT = 'mp3_44100_96';
 export const MAX_TEXT_LENGTH = 400;
 
-// Chaves de voz usadas pelo app. Os nomes são procurados na biblioteca da
-// conta (ordem de preferência); o `id` é o fallback caso nenhum exista.
+// Vozes geradas pelo app. Os personagens NÃO entram aqui: a voz deles é
+// sempre a do Gemini Live, inclusive na primeira fala. Os nomes são
+// procurados na biblioteca da conta (ordem de preferência); o `id` é o
+// fallback caso nenhum exista.
 export const VOICE_PRESETS = {
-  // Computador de bordo da máquina do tempo
+  // Computador de bordo da máquina do tempo (também narra a home)
   machine: {
     names: ['Daniel', 'Brian', 'George'],
     id: 'onwK4e9ZLuTAKqWW03F9',
     settings: { stability: 0.62, similarity_boost: 0.8, style: 0.12, use_speaker_boost: true },
   },
-  // Mapeamento das vozes Gemini dos personagens → vozes ElevenLabs
-  Puck:   { names: ['Borges', 'Chris', 'Will'],        id: 'iP95p4xoKVk53GoZ742B' },
-  Charon: { names: ['George', 'Brian', 'Adam Stone'],  id: 'JBFqnCBsd6RMkjVDRZzb' },
-  Fenrir: { names: ['Bill', 'Adam', 'Roger'],          id: 'pqHfZKP75CvOlQylNhV4' },
-  Kore:   { names: ['Ana Alice', 'Matilda', 'Sarah'],  id: 'XrExE9yKIg1WjnnlVkGX' },
-  Zephyr: { names: ['Roberta', 'Jessica', 'Lily'],     id: 'cgSgspJ2msm6clMCkdW9' },
 };
-
-const CHARACTER_SETTINGS = { stability: 0.42, similarity_boost: 0.8, style: 0.35, use_speaker_boost: true };
 
 export function getApiKey() {
   return process.env.ELEVEN_API_KEY || process.env.ELEVENLABS_API_KEY;
@@ -173,7 +167,7 @@ export async function synthesize(voiceKey, text, { log = console } = {}) {
       // Pode ter sido gerado por outro pedido enquanto esperava na fila
       if (fs.existsSync(file)) return fs.readFileSync(file);
       const voiceId = await resolveVoiceId(voiceKey, apiKey);
-      const settings = VOICE_PRESETS[voiceKey].settings ?? CHARACTER_SETTINGS;
+      const settings = VOICE_PRESETS[voiceKey].settings;
       const buffer = await requestElevenLabs(voiceId, clean, settings, apiKey);
       try {
         fs.mkdirSync(path.dirname(file), { recursive: true });

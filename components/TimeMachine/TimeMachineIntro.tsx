@@ -4,8 +4,8 @@ import { Character } from '../../types';
 import { parseEra, formatYear, PRESENT_YEAR } from '../../services/era';
 import { TimeMachineAudio } from '../../services/timeMachineSfx';
 import { speakAsMachine, cancelMachineSpeech, warmUpVoices } from '../../services/timeMachineVoice';
-import { machineLines, arrivalLine, characterVoiceKey } from '../../services/voiceLines';
-import { prefetchVoices, VoiceKey } from '../../services/tts';
+import { machineLines } from '../../services/voiceLines';
+import { prefetchVoices } from '../../services/tts';
 import WarpCanvas, { WarpControls } from './WarpCanvas';
 import './timeMachine.css';
 
@@ -95,7 +95,6 @@ const TimeMachineIntro: React.FC<TimeMachineIntroProps> = ({ character, onComple
     warmUpVoices();
     // Baixa (ou gera) as falas desta viagem enquanto a máquina liga
     prefetchVoices('machine', Object.values(lines));
-    prefetchVoices(characterVoiceKey(character) as VoiceKey, [arrivalLine(character)]);
 
     const guard = () => {
       if (cancelled) throw new Error('cancelled');
