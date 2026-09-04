@@ -188,6 +188,9 @@ const LiveConversation: React.FC<LiveConversationProps> = ({
         inputAnalyser.fftSize = 512;
 
         const ai = await getGeminiClient();
+        // Marca quando o servidor encerra, para o microfone parar de enviar
+        // para um socket fechado (evita "WebSocket is already in CLOSING").
+        let closed = false;
         const sessionPromise = ai.live.connect({
           model: 'gemini-2.5-flash-native-audio-preview-12-2025',
           callbacks: {
@@ -201,7 +204,7 @@ const LiveConversation: React.FC<LiveConversationProps> = ({
 
               scriptProcessor.onaudioprocess = (e) => {
                 // Segura o microfone até o personagem ter feito a primeira fala
-                if (isMutedRef.current || !greetingSentRef.current) return;
+                if (cancelled || closed || isMutedRef.current || !greetingSentRef.current) return;
                 const inputData = e.inputBuffer.getChannelData(0);
                 const pcmBlob = createBlob(inputData);
                 sessionPromise.then((session) => {
@@ -259,7 +262,7 @@ const LiveConversation: React.FC<LiveConversationProps> = ({
               }
             },
             onerror: (e) => console.error('Gemini Live Error:', e),
-            onclose: () => setIsConnected(false),
+            onclose: () => { closed = true; setIsConnected(false); },
           },
           config: {
             responseModalities: [Modality.AUDIO],
@@ -295,7 +298,13 @@ const LiveConversation: React.FC<LiveConversationProps> = ({
 
         const session = await sessionPromise;
         if (cancelled) {
-          session.close();
+          // O componente já foi desmontado (ou remontado pelo modo estrito):
+          // encerra tudo que ESTA tentativa criou, sem tocar nos refs atuais.
+          closed = true;
+          try { session.close(); } catch { /* já fechada */ }
+          stream.getTracks().forEach(track => track.stop());
+          inputCtx.close().catch(() => undefined);
+          outputCtx.close().catch(() => undefined);
           return;
         }
         sessionRef.current = session;
