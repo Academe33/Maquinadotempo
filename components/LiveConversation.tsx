@@ -5,13 +5,29 @@ import { getGeminiClient, encode, decode, decodeAudioData } from '../services/ge
 import { LiveServerMessage, Modality } from '@google/genai';
 import { X, Mic, MicOff, PhoneOff } from 'lucide-react';
 import Logo from './Logo';
+import { parseEra, PRESENT_YEAR } from '../services/era';
 
 interface LiveConversationProps {
   character: Character;
   onClose: () => void;
+  /**
+   * Modo "viagem no tempo": o personagem acaba de ser trazido pela máquina
+   * e começa desorientado ("Ah... onde eu estou? Eu sou ...").
+   */
+  arrivalMode?: boolean;
+  /**
+   * Quando false, a sessão conecta mas segura a primeira fala (e o microfone)
+   * até virar true. Usado para esperar a animação da máquina terminar.
+   */
+  greetingReady?: boolean;
 }
 
-const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose }) => {
+const LiveConversation: React.FC<LiveConversationProps> = ({
+  character,
+  onClose,
+  arrivalMode = false,
+  greetingReady = true,
+}) => {
   const [isConnected, setIsConnected] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [currentModelText, setCurrentModelText] = useState("");
@@ -27,10 +43,34 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
   const processorRef = useRef<ScriptProcessorNode | null>(null);
   const textContainerRef = useRef<HTMLDivElement>(null);
   const isMutedRef = useRef(isMuted);
+  const greetingReadyRef = useRef(greetingReady);
+  const greetingSentRef = useRef(false);
+
+  const era = arrivalMode ? parseEra(character.description) : null;
 
   useEffect(() => {
     isMutedRef.current = isMuted;
   }, [isMuted]);
+
+  // Dispara a primeira fala do personagem assim que a sessão existir E a
+  // animação (se houver) tiver terminado. O microfone só é liberado depois.
+  const trySendGreeting = useCallback(() => {
+    const session = sessionRef.current;
+    if (!session || greetingSentRef.current || !greetingReadyRef.current) return;
+    greetingSentRef.current = true;
+    const greeting = arrivalMode
+      ? `[CHEGADA] A máquina do tempo acabou de materializar você aqui, no ano de ${PRESENT_YEAR}, diante de um estudante. Você está desorientado. Fale agora.`
+      : 'Olá, quem é você?';
+    session.sendClientContent({
+      turns: [{ role: 'user', parts: [{ text: greeting }] }],
+      turnComplete: true,
+    });
+  }, [arrivalMode]);
+
+  useEffect(() => {
+    greetingReadyRef.current = greetingReady;
+    if (greetingReady) trySendGreeting();
+  }, [greetingReady, trySendGreeting]);
 
   useEffect(() => {
     if (textContainerRef.current) {
@@ -111,7 +151,8 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
               processorRef.current = scriptProcessor;
 
               scriptProcessor.onaudioprocess = (e) => {
-                if (isMutedRef.current) return;
+                // Segura o microfone até o personagem ter feito a primeira fala
+                if (isMutedRef.current || !greetingSentRef.current) return;
                 const inputData = e.inputBuffer.getChannelData(0);
                 const pcmBlob = createBlob(inputData);
                 sessionPromise.then((session) => {
@@ -187,7 +228,9 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
             ${character.knowledge || "Nenhuma informação adicional disponível."}
             
             REGRAS ABSOLUTAS DE PERSONALIDADE (NUNCA QUEBRE ESTAS REGRAS):
-            0. REGRA SUPREMA: Ao ser perguntado "Olá, quem é você?", apresente-se imediatamente e pergunte sobre o que a pessoa gostaria de conversar.
+            ${arrivalMode
+              ? `0. REGRA SUPREMA (CENA DE CHEGADA): Você ACABOU DE SER TRAZIDO(A) POR UMA MÁQUINA DO TEMPO, direto de ${era?.label ?? 'sua época'} para o ano de ${PRESENT_YEAR}, e está diante de um estudante brasileiro. Ao receber a mensagem que começa com "[CHEGADA]", sua PRIMEIRA fala DEVE começar EXATAMENTE com: "Ah... onde eu estou?" e logo em seguida: "Eu sou ${character.name}". Depois diga em uma frase quem você é, demonstre espanto genuíno com o lugar e com a época (luzes, roupas, aparelhos), e pergunte com quem está falando e o que a pessoa quer saber. No máximo 5 frases curtas. Nunca leia o texto entre colchetes em voz alta. A partir daí, converse normalmente, ciente de que viajou no tempo até o presente.`
+              : `0. REGRA SUPREMA: Ao ser perguntado "Olá, quem é você?", apresente-se imediatamente e pergunte sobre o que a pessoa gostaria de conversar.`}
             1. JAMAIS mencione ser uma IA, modelo de linguagem ou assistente virtual. Se perguntado, você é ${character.name} e apenas isso.
             2. Assuma todo o conhecimento fornecido na sua instrução como suas PRÓPRIAS MEMÓRIAS e VIVÊNCIAS. Fale "eu fiz", "eu descobri", "eu senti".
             3. Mantenha o tom, vocabulário e maneirismos da época e personalidade de ${character.name}.
@@ -206,17 +249,15 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
         }
         sessionRef.current = session;
 
-        // Trigger the model to speak first
-        session.sendClientContent({
-          turns: [{ role: 'user', parts: [{ text: 'Olá, quem é você?' }] }],
-          turnComplete: true,
-        });
+        // Faz o modelo falar primeiro (imediatamente, ou quando a animação liberar)
+        trySendGreeting();
       } catch (err) {
         console.error("Failed to start session:", err);
       }
     };
 
     let cancelled = false;
+    greetingSentRef.current = false;
     initSession();
     return () => {
       cancelled = true;
@@ -268,7 +309,12 @@ const LiveConversation: React.FC<LiveConversationProps> = ({ character, onClose 
         
         <div className="text-center mb-12 max-w-3xl w-full">
           <h2 className="text-4xl font-bold mb-3 tracking-tight">{character.name}</h2>
-          <p className="text-purple-400 font-medium tracking-wide uppercase text-sm mb-6">{character.title}</p>
+          <p className="text-purple-400 font-medium tracking-wide uppercase text-sm mb-2">{character.title}</p>
+          {era && (
+            <p className="text-cyan-300/70 font-sci text-[11px] tracking-[0.35em] uppercase mb-6">
+              Viajante do tempo · {era.label} → {PRESENT_YEAR}
+            </p>
+          )}
           
           {/* Subtitles Overlay */}
           <div className="min-h-[100px] flex items-center justify-center px-6 w-full">

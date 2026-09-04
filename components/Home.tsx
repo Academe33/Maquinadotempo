@@ -1,13 +1,22 @@
 import React, { useState, useMemo } from 'react';
+import { AnimatePresence } from 'motion/react';
 import { Character } from '../types';
 import { useCharacters } from '../contexts/CharacterContext';
 import CharacterCard from './CharacterCard';
 import LiveConversation from './LiveConversation';
+import TimeMachineIntro from './TimeMachine/TimeMachineIntro';
 import Logo from './Logo';
 
 const Home: React.FC = () => {
   const { characters } = useCharacters();
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
+  // true depois que a máquina do tempo "entrega" o personagem no presente
+  const [hasArrived, setHasArrived] = useState(false);
+
+  const handleSelectCharacter = (char: Character) => {
+    setHasArrived(false);
+    setSelectedCharacter(char);
+  };
   
   const categories = useMemo(() => {
     return Array.from(new Set(characters.map(c => c.category)));
@@ -32,10 +41,25 @@ const Home: React.FC = () => {
 
   if (selectedCharacter) {
     return (
-      <LiveConversation 
-        character={selectedCharacter} 
-        onClose={() => setSelectedCharacter(null)} 
-      />
+      <>
+        {/* A conversa conecta por baixo enquanto a máquina roda; a primeira
+            fala do personagem só sai quando a animação termina. */}
+        <LiveConversation
+          character={selectedCharacter}
+          onClose={() => setSelectedCharacter(null)}
+          arrivalMode
+          greetingReady={hasArrived}
+        />
+        <AnimatePresence>
+          {!hasArrived && (
+            <TimeMachineIntro
+              key={selectedCharacter.id}
+              character={selectedCharacter}
+              onComplete={() => setHasArrived(true)}
+            />
+          )}
+        </AnimatePresence>
+      </>
     );
   }
 
@@ -85,7 +109,7 @@ const Home: React.FC = () => {
               <CharacterCard 
                 key={char.id} 
                 character={char} 
-                onClick={setSelectedCharacter} 
+                onClick={handleSelectCharacter} 
               />
             ))}
           </div>
