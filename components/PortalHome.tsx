@@ -6,6 +6,8 @@ import Portal from './TimeMachine/Portal';
 import { HomeViewProps, sectorLabel, sectorEmoji, splitDescription, fallbackAvatar, readStored, writeStored, searchCharacters } from './homeShared';
 
 const LAST_CHARACTER_KEY = 'tm-last-character';
+/** Máximo de marcadores desenhados de uma vez (a busca pode trazer ~100) */
+const DOT_WINDOW = 13;
 
 /**
  * Home em modo portal: o mesmo portal da viagem no centro, com o rosto do
@@ -137,6 +139,7 @@ const PortalHome: React.FC<HomeViewProps> = ({ characters, categories, selectedC
   };
 
   const info = focused ? splitDescription(focused.description) : null;
+  const dotStart = Math.max(0, Math.min(travelers.length - DOT_WINDOW, focusedIndex - Math.floor(DOT_WINDOW / 2)));
 
   return (
     <div className="relative z-10 flex-1 min-h-0 flex flex-col">
@@ -187,13 +190,13 @@ const PortalHome: React.FC<HomeViewProps> = ({ characters, categories, selectedC
       </div>
 
       {/* Portal com o viajante em foco */}
-      <div className="relative flex-1 min-h-0 flex items-center justify-center" style={{ minHeight: 'calc(var(--portal-size) * var(--home-portal-scale, 1) + 3rem)' }}>
+      <div className="tm-home-portal-area relative min-h-0">
         <button
           type="button"
           onClick={() => step(-1)}
           disabled={focusedIndex <= 0}
           aria-label="Viajante anterior"
-          className="hidden md:flex absolute left-[max(1.5rem,calc(50%-var(--portal-size)*1.15))] top-1/2 -translate-y-1/2 z-20 w-11 h-11 items-center justify-center rounded-full border border-white/15 bg-black/40 text-slate-300 hover:text-white hover:border-cyan-300/60 disabled:opacity-20 transition-colors"
+          className="hidden md:flex absolute left-4 lg:left-10 top-1/2 -translate-y-1/2 z-20 w-11 h-11 items-center justify-center rounded-full border border-white/15 bg-black/40 text-slate-300 hover:text-white hover:border-cyan-300/60 disabled:opacity-20 transition-colors"
         >
           <ChevronLeft size={22} />
         </button>
@@ -202,14 +205,13 @@ const PortalHome: React.FC<HomeViewProps> = ({ characters, categories, selectedC
           onClick={() => step(1)}
           disabled={focusedIndex >= travelers.length - 1}
           aria-label="Próximo viajante"
-          className="hidden md:flex absolute right-[max(1.5rem,calc(50%-var(--portal-size)*1.15))] top-1/2 -translate-y-1/2 z-20 w-11 h-11 items-center justify-center rounded-full border border-white/15 bg-black/40 text-slate-300 hover:text-white hover:border-cyan-300/60 disabled:opacity-20 transition-colors"
+          className="hidden md:flex absolute right-4 lg:right-10 top-1/2 -translate-y-1/2 z-20 w-11 h-11 items-center justify-center rounded-full border border-white/15 bg-black/40 text-slate-300 hover:text-white hover:border-cyan-300/60 disabled:opacity-20 transition-colors"
         >
           <ChevronRight size={22} />
         </button>
 
         <div
-          className="relative z-10 cursor-pointer touch-pan-y"
-          style={{ width: 'calc(var(--portal-size) * var(--home-portal-scale, 1))' }}
+          className="tm-home-portal z-10 cursor-pointer touch-pan-y"
           onPointerDown={onPortalPointerDown}
           onPointerUp={onPortalPointerUp}
           onPointerCancel={() => { swipeRef.current = null; }}
@@ -270,7 +272,7 @@ const PortalHome: React.FC<HomeViewProps> = ({ characters, categories, selectedC
       </div>
 
       {/* Nome e feito do viajante em foco */}
-      <div className="shrink-0 text-center px-4 pt-2 min-h-[4.75rem] md:min-h-[5.5rem] relative z-20">
+      <div className="tm-home-name shrink-0 text-center px-4 pt-2 relative z-20">
         {!focused && searching && (
           <div className="flex flex-col items-center gap-2 pt-1">
             <p className="text-slate-400 text-sm md:text-base">Nada para “{query.trim()}”. Tente outro nome ou área.</p>
@@ -315,7 +317,6 @@ const PortalHome: React.FC<HomeViewProps> = ({ characters, categories, selectedC
           ref={facesRef}
           onScroll={handleFacesScroll}
           className="tm-carousel tm-carousel-faces py-2 select-none"
-          style={{ ['--face-w' as any]: 'clamp(4.5rem, 20vw, 6rem)' }}
           aria-label={searching ? `Resultados da busca por ${query.trim()}` : `Viajantes do setor ${sectorLabel(selectedCategory)}`}
         >
           {travelers.map((char, i) => {
@@ -351,10 +352,15 @@ const PortalHome: React.FC<HomeViewProps> = ({ characters, categories, selectedC
             );
           })}
         </div>
-        <div className="flex justify-center gap-1 mt-1">
-          {travelers.map((c, i) => (
-            <span key={c.id} className={`h-1 rounded-full transition-all duration-300 ${i === focusedIndex ? 'w-4 bg-cyan-300' : 'w-1 bg-white/20'}`} />
+        <div className="flex justify-center items-center gap-1 mt-1 px-4 overflow-hidden">
+          {dotStart > 0 && <span className="h-1 w-1 rounded-full bg-white/10" />}
+          {travelers.slice(dotStart, dotStart + DOT_WINDOW).map((c, i) => (
+            <span
+              key={c.id}
+              className={`h-1 rounded-full transition-all duration-300 ${dotStart + i === focusedIndex ? 'w-4 bg-cyan-300' : 'w-1 bg-white/20'}`}
+            />
           ))}
+          {dotStart + DOT_WINDOW < travelers.length && <span className="h-1 w-1 rounded-full bg-white/10" />}
         </div>
       </div>
 

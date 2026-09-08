@@ -4,6 +4,14 @@
 
 type Stoppable = { stop: (when?: number) => void };
 
+// Mistura da viagem: os efeitos ficam um pouco abaixo e a narração do
+// computador de bordo um pouco acima, para a fala nunca competir com o
+// reator, o vórtice e os bipes. Enquanto a máquina fala, os efeitos ainda
+// baixam mais um pouco (ducking) e voltam sozinhos quando a fala acaba.
+const SFX_LEVEL = 0.62;
+const SFX_DUCKED = 0.34;
+const VOICE_LEVEL = 1.18;
+
 const AudioCtor =
   typeof window !== 'undefined'
     ? window.AudioContext || (window as any).webkitAudioContext
@@ -12,6 +20,11 @@ const AudioCtor =
 export class TimeMachineAudio {
   private ctx: AudioContext | null = null;
   private master: GainNode | null = null;
+  /** Barramento dos efeitos sintetizados (zumbido, bipes, vórtice, impacto) */
+  private sfxBus: GainNode | null = null;
+  /** Barramento da narração da máquina */
+  private voiceBus: GainNode | null = null;
+  private ducking = 0;
   private noiseBuffer: AudioBuffer | null = null;
   private hum: { oscs: OscillatorNode[]; filter: BiquadFilterNode; gain: GainNode; lfo: OscillatorNode } | null = null;
   private live: Set<Stoppable> = new Set();
@@ -22,12 +35,28 @@ export class TimeMachineAudio {
       this.ctx = new AudioCtor();
       this.master = this.ctx.createGain();
       this.master.gain.value = 0.9;
-      // Compressor para o "boom" não estourar em fones/celular
+
+      this.sfxBus = this.ctx.createGain();
+      this.sfxBus.gain.value = SFX_LEVEL;
+      // Compressor só nos efeitos: segura o "boom" sem achatar a narração
       const comp = this.ctx.createDynamicsCompressor();
       comp.threshold.value = -12;
       comp.ratio.value = 6;
-      this.master.connect(comp);
-      comp.connect(this.ctx.destination);
+      this.sfxBus.connect(comp);
+      comp.connect(this.master);
+
+      this.voiceBus = this.ctx.createGain();
+      this.voiceBus.gain.value = VOICE_LEVEL;
+      // Limitador suave: deixa a voz alta sem estourar em fones/celular
+      const voiceComp = this.ctx.createDynamicsCompressor();
+      voiceComp.threshold.value = -6;
+      voiceComp.ratio.value = 4;
+      voiceComp.attack.value = 0.004;
+      voiceComp.release.value = 0.2;
+      this.voiceBus.connect(voiceComp);
+      voiceComp.connect(this.master);
+
+      this.master.connect(this.ctx.destination);
     } catch {
       this.ctx = null;
     }
@@ -45,6 +74,29 @@ export class TimeMachineAudio {
 
   private now() {
     return this.ctx ? this.ctx.currentTime : 0;
+  }
+
+  /**
+   * Abaixa os efeitos enquanto a máquina fala. Conta quantas falas estão no
+   * ar para que duas falas sobrepostas não desfaçam a atenuação cedo demais.
+   */
+  duck() {
+    this.ducking++;
+    this.applyDuck(0.18);
+  }
+
+  unduck() {
+    this.ducking = Math.max(0, this.ducking - 1);
+    this.applyDuck(0.45);
+  }
+
+  private applyDuck(seconds: number) {
+    if (!this.ctx || !this.sfxBus) return;
+    const t = this.now();
+    const target = this.ducking > 0 ? SFX_DUCKED : SFX_LEVEL;
+    this.sfxBus.gain.cancelScheduledValues(t);
+    this.sfxBus.gain.setValueAtTime(this.sfxBus.gain.value, t);
+    this.sfxBus.gain.linearRampToValueAtTime(target, t + seconds);
   }
 
   private noise(): AudioBuffer {
@@ -105,7 +157,7 @@ export class TimeMachineAudio {
     lfo.start(t);
 
     filter.connect(gain);
-    gain.connect(this.master);
+    gain.connect(this.sfxBus!);
     this.hum = { oscs, filter, gain, lfo };
   }
 
@@ -138,7 +190,7 @@ export class TimeMachineAudio {
     gain.gain.exponentialRampToValueAtTime(volume, t + 0.01);
     gain.gain.exponentialRampToValueAtTime(0.0001, t + duration);
     osc.connect(gain);
-    gain.connect(this.master);
+    gain.connect(this.sfxBus!);
     osc.start(t);
     osc.stop(t + duration + 0.05);
   }
@@ -165,7 +217,7 @@ export class TimeMachineAudio {
     gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.03);
     src.connect(filter);
     filter.connect(gain);
-    gain.connect(this.master);
+    gain.connect(this.sfxBus!);
     src.start(t, Math.random() * 2);
     src.stop(t + 0.05);
   }
@@ -188,11 +240,11 @@ export class TimeMachineAudio {
     const feedback = ctx.createGain();
     feedback.gain.value = 0.35;
     osc.connect(gain);
-    gain.connect(this.master);
+    gain.connect(this.sfxBus!);
     gain.connect(delayNode);
     delayNode.connect(feedback);
     feedback.connect(delayNode);
-    delayNode.connect(this.master);
+    delayNode.connect(this.sfxBus!);
     osc.start(t);
     osc.stop(t + 1.2);
   }
@@ -217,7 +269,7 @@ export class TimeMachineAudio {
     oscGain.gain.exponentialRampToValueAtTime(0.0001, t + duration + 0.3);
     osc.connect(oscFilter);
     oscFilter.connect(oscGain);
-    oscGain.connect(this.master);
+    oscGain.connect(this.sfxBus!);
     osc.start(t);
     osc.stop(t + duration + 0.4);
 
@@ -235,7 +287,7 @@ export class TimeMachineAudio {
     nGain.gain.exponentialRampToValueAtTime(0.0001, t + duration + 0.3);
     noise.connect(bp);
     bp.connect(nGain);
-    nGain.connect(this.master);
+    nGain.connect(this.sfxBus!);
     noise.start(t);
     noise.stop(t + duration + 0.4);
     this.track(noise);
@@ -263,7 +315,7 @@ export class TimeMachineAudio {
     gain.gain.exponentialRampToValueAtTime(0.0001, t + duration);
     noise.connect(bp);
     bp.connect(gain);
-    gain.connect(this.master);
+    gain.connect(this.sfxBus!);
     noise.start(t);
     noise.stop(t + duration + 0.1);
     this.track(noise);
@@ -286,7 +338,7 @@ export class TimeMachineAudio {
     trem.connect(tremGain);
     tremGain.connect(oscGain.gain);
     osc.connect(oscGain);
-    oscGain.connect(this.master);
+    oscGain.connect(this.sfxBus!);
     osc.start(t);
     trem.start(t);
     osc.stop(t + duration + 0.1);
@@ -308,7 +360,7 @@ export class TimeMachineAudio {
     gain.gain.exponentialRampToValueAtTime(0.9, t + 0.02);
     gain.gain.exponentialRampToValueAtTime(0.0001, t + 1.6);
     osc.connect(gain);
-    gain.connect(this.master);
+    gain.connect(this.sfxBus!);
     osc.start(t);
     osc.stop(t + 1.7);
 
@@ -323,7 +375,7 @@ export class TimeMachineAudio {
     nGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.9);
     noise.connect(lp);
     lp.connect(nGain);
-    nGain.connect(this.master);
+    nGain.connect(this.sfxBus!);
     noise.start(t);
     noise.stop(t + 1);
   }
@@ -340,7 +392,7 @@ export class TimeMachineAudio {
     feedback.gain.value = 0.4;
     delayNode.connect(feedback);
     feedback.connect(delayNode);
-    delayNode.connect(this.master);
+    delayNode.connect(this.sfxBus!);
 
     notes.forEach((f, i) => {
       const osc = ctx.createOscillator();
@@ -352,7 +404,7 @@ export class TimeMachineAudio {
       gain.gain.exponentialRampToValueAtTime(0.14, start + 0.03);
       gain.gain.exponentialRampToValueAtTime(0.0001, start + 1.6);
       osc.connect(gain);
-      gain.connect(this.master);
+      gain.connect(this.sfxBus!);
       gain.connect(delayNode);
       osc.start(start);
       osc.stop(start + 1.7);
@@ -378,13 +430,21 @@ export class TimeMachineAudio {
     const gain = ctx.createGain();
     gain.gain.value = volume;
     source.connect(gain);
-    gain.connect(this.master);
+    gain.connect(this.voiceBus!);
     let finish: () => void = () => undefined;
     const done = new Promise<void>(resolve => { finish = resolve; });
-    source.addEventListener('ended', () => { this.live.delete(source); finish(); }, { once: true });
+    let released = false;
+    const release = () => {
+      if (released) return;
+      released = true;
+      this.unduck();
+      finish();
+    };
+    source.addEventListener('ended', () => { this.live.delete(source); release(); }, { once: true });
+    this.duck();
     source.start();
     this.track(source);
-    return { done, stop: () => { try { source.stop(); } catch { /* já parou */ } finish(); } };
+    return { done, stop: () => { try { source.stop(); } catch { /* já parou */ } release(); } };
   }
 
   /** Reduz tudo a zero e fecha o contexto */
@@ -411,6 +471,9 @@ export class TimeMachineAudio {
     const ctx = this.ctx;
     this.ctx = null;
     this.master = null;
+    this.sfxBus = null;
+    this.voiceBus = null;
+    this.ducking = 0;
     ctx.close().catch(() => undefined);
   }
 }

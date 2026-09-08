@@ -108,7 +108,15 @@ export async function speakAsMachine(text: string, opts: MachineSpeakOptions = {
   } catch (err) {
     console.warn('Voz ElevenLabs indisponível, usando o sintetizador do navegador:', (err as Error).message);
   }
-  await speakWithBrowser(text);
+  // O sintetizador do navegador toca fora do AudioContext da máquina, então
+  // a atenuação dos efeitos precisa ser pedida na mão.
+  const audio = opts.audio?.available ? opts.audio : null;
+  audio?.duck();
+  try {
+    await speakWithBrowser(text);
+  } finally {
+    audio?.unduck();
+  }
 }
 
 export function cancelMachineSpeech() {

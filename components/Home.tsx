@@ -88,7 +88,7 @@ const Home: React.FC = () => {
       const buffer = await fetchVoice('machine', text);
       if (!narrationRef.current) return;
       playbackRef.current?.stop();
-      playbackRef.current = playBufferElement(buffer, 0.9);
+      playbackRef.current = playBufferElement(buffer, 1);
     } catch (err) {
       console.warn('Narração indisponível:', (err as Error).message);
     }

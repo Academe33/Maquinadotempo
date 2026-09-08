@@ -25,6 +25,27 @@ interface Particle {
 const PARTICLE_COUNT = 420;
 const RING_COUNT = 14;
 
+const media = (q: string) =>
+  typeof window !== 'undefined' && !!window.matchMedia && window.matchMedia(q).matches;
+
+/**
+ * Quantas partículas desenhar. Celular tem tela pequena e GPU modesta:
+ * o mesmo enxame do desktop derruba a taxa de quadros sem acrescentar nada
+ * que se enxergue. A conta é por área de tela, com teto menor no toque.
+ */
+function particleBudget(width: number, height: number) {
+  if (media('(prefers-reduced-motion: reduce)')) return 90;
+  const touch = media('(pointer: coarse)');
+  const byArea = Math.round((width * height) / 2600);
+  return Math.max(110, Math.min(touch ? 190 : PARTICLE_COUNT, byArea));
+}
+
+/** Anéis do túnel: menos alguns no celular, onde quase não se distinguem */
+function ringBudget() {
+  if (media('(prefers-reduced-motion: reduce)')) return 6;
+  return media('(pointer: coarse)') ? 9 : RING_COUNT;
+}
+
 // Canvas 2D de "túnel temporal": estrelas em streak radial, anéis do túnel
 // em perspectiva, brilho no centro e rotação suave. Todo o estado de
 // intensidade vem por ref, para que o loop de RAF não dependa de re-render.
@@ -47,6 +68,7 @@ const WarpCanvas: React.FC<WarpCanvasProps> = ({ controls, className }) => {
     let smoothIntensity = 0;
 
     const particles: Particle[] = [];
+    const ringCount = ringBudget();
     const spawn = (p: Particle, fresh: boolean) => {
       p.angle = Math.random() * Math.PI * 2;
       p.radius = fresh ? Math.random() : (controls.current.direction === 1 ? 0.02 + Math.random() * 0.05 : 0.9 + Math.random() * 0.3);
@@ -55,19 +77,26 @@ const WarpCanvas: React.FC<WarpCanvasProps> = ({ controls, className }) => {
       p.hue = 250 + Math.random() * 70; // roxo → magenta, com alguns ciano
       if (Math.random() < 0.15) p.hue = 190 + Math.random() * 20;
     };
-    for (let i = 0; i < PARTICLE_COUNT; i++) {
-      const p = { angle: 0, radius: 0, speed: 0, size: 0, hue: 0 };
-      spawn(p, true);
-      particles.push(p);
-    }
+    const fitParticles = () => {
+      const target = particleBudget(width, height);
+      while (particles.length < target) {
+        const p = { angle: 0, radius: 0, speed: 0, size: 0, hue: 0 };
+        spawn(p, true);
+        particles.push(p);
+      }
+      if (particles.length > target) particles.length = target;
+    };
 
     const resize = () => {
-      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      // Passar de 1.5x no celular só custa preenchimento, sem ganho visível
+      const maxDpr = media('(pointer: coarse)') ? 1.5 : 2;
+      dpr = Math.min(window.devicePixelRatio || 1, maxDpr);
       width = canvas.clientWidth;
       height = canvas.clientHeight;
       canvas.width = Math.floor(width * dpr);
       canvas.height = Math.floor(height * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      fitParticles();
     };
     resize();
     const ro = new ResizeObserver(resize);
@@ -97,8 +126,8 @@ const WarpCanvas: React.FC<WarpCanvasProps> = ({ controls, className }) => {
         ctx.save();
         ctx.translate(cx, cy);
         ctx.rotate(rotation * 0.35);
-        for (let i = 0; i < RING_COUNT; i++) {
-          const z = ((i / RING_COUNT + tunnelPhase) % 1 + 1) % 1; // 0 (longe) → 1 (perto)
+        for (let i = 0; i < ringCount; i++) {
+          const z = ((i / ringCount + tunnelPhase) % 1 + 1) % 1; // 0 (longe) → 1 (perto)
           const r = Math.pow(z, 2.2) * maxR * 1.1;
           if (r < 2) continue;
           const alpha = Math.pow(z, 1.5) * 0.5 * k;

@@ -181,20 +181,24 @@
   color: var(--tm-accent-2);
 }
 
-/* Cantos do HUD */
+/* Cantos do HUD (recuam para dentro das áreas seguras do celular) */
 .tm-corner {
   position: absolute;
-  width: 42px;
-  height: 42px;
+  width: clamp(18px, 6vw, 42px);
+  height: clamp(18px, 6vw, 42px);
   border-color: rgba(168, 85, 247, 0.7);
   border-style: solid;
   border-width: 0;
   pointer-events: none;
+  --tm-corner-t: calc(env(safe-area-inset-top) + 10px);
+  --tm-corner-b: calc(env(safe-area-inset-bottom) + 10px);
+  --tm-corner-l: calc(env(safe-area-inset-left) + 10px);
+  --tm-corner-r: calc(env(safe-area-inset-right) + 10px);
 }
-.tm-corner.tl { top: 18px; left: 18px; border-top-width: 2px; border-left-width: 2px; }
-.tm-corner.tr { top: 18px; right: 18px; border-top-width: 2px; border-right-width: 2px; }
-.tm-corner.bl { bottom: 18px; left: 18px; border-bottom-width: 2px; border-left-width: 2px; }
-.tm-corner.br { bottom: 18px; right: 18px; border-bottom-width: 2px; border-right-width: 2px; }
+.tm-corner.tl { top: var(--tm-corner-t); left: var(--tm-corner-l); border-top-width: 2px; border-left-width: 2px; }
+.tm-corner.tr { top: var(--tm-corner-t); right: var(--tm-corner-r); border-top-width: 2px; border-right-width: 2px; }
+.tm-corner.bl { bottom: var(--tm-corner-b); left: var(--tm-corner-l); border-bottom-width: 2px; border-left-width: 2px; }
+.tm-corner.br { bottom: var(--tm-corner-b); right: var(--tm-corner-r); border-bottom-width: 2px; border-right-width: 2px; }
 
 /* Barra de energia */
 .tm-energy-track {
@@ -256,12 +260,20 @@
     --portal-cy: 41%;
   }
 }
-/* Telas baixas e largas (celular deitado): portal menor e mais alto */
-@media (max-height: 480px) {
+/* Telas baixas e largas (celular deitado): portal menor e mais alto, para
+   sobrar altura para nome, legenda e controles sem nada se sobrepor */
+@media (max-height: 560px) {
   .tm-stage {
-    --portal-size: min(40vw, 12rem, 38vh);
-    --portal-size: min(40vw, 12rem, 38dvh);
-    --portal-cy: 40%;
+    --portal-size: min(34vw, 9rem, 30vh);
+    --portal-size: min(34vw, 9rem, 30dvh);
+    --portal-cy: 32%;
+  }
+}
+@media (max-height: 430px) {
+  .tm-stage {
+    --portal-size: min(30vw, 7rem, 28vh);
+    --portal-size: min(30vw, 7rem, 28dvh);
+    --portal-cy: 30%;
   }
 }
 .tm-stage-portal {
@@ -333,6 +345,8 @@
 
 /* Botão "segure para falar" */
 .tm-ptt {
+  width: clamp(3.25rem, min(17vw, 13vh), 5.5rem);
+  height: clamp(3.25rem, min(17vw, 13vh), 5.5rem);
   touch-action: none;
   -webkit-user-select: none;
   user-select: none;
@@ -356,24 +370,49 @@
 /* Altura útil que acompanha a barra do navegador no celular */
 .tm-screen { height: 100vh; height: 100dvh; }
 
-/* Home em modo portal: em telas baixas o portal encolhe um pouco para
-   caber setores, nome, carrossel e botão sem rolagem */
-.tm-stage { --home-portal-scale: 1; }
-@media (max-height: 700px) { .tm-stage { --home-portal-scale: 0.82; } }
-@media (max-height: 560px) { .tm-stage { --home-portal-scale: 0.7; } }
+/* =====================================================================
+   Home em modo portal: o círculo ocupa exatamente a altura que sobra
+   depois de setores, nome, carrossel e botão. Em tela alta ele bate com
+   --portal-size (o mesmo tamanho da viagem e da conversa); em tela baixa
+   encolhe sozinho, em vez de empurrar o botão para fora do visor.
+   ===================================================================== */
+.tm-home-portal-area {
+  flex: 1 1 auto;
+  min-height: 3.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-block: 0.25rem;
+}
+.tm-home-portal {
+  position: relative;
+  height: 100%;
+  max-height: 100%;
+  aspect-ratio: 1;
+  max-width: min(var(--portal-size), 68vw);
+  margin-inline: auto;
+}
+
+/* O nome e o feito também encolhem quando falta altura */
+.tm-home-name { min-height: 4.75rem; }
+@media (min-width: 768px) { .tm-home-name { min-height: 5.5rem; } }
+@media (max-height: 700px) { .tm-home-name { min-height: 3.9rem; } }
+@media (max-height: 560px) { .tm-home-name { min-height: 3.1rem; } }
+
+/* Rosto do carrossel: nunca menor que o alvo de toque confortável */
+.tm-carousel-faces { --face-w: clamp(4.25rem, 20vw, 6rem); }
 
 /* Legenda da conversa: até ~3 linhas, ancorada embaixo; o que já foi dito
    sai por cima com fade em vez de empurrar a interface */
 .tm-caption {
-  font-size: 1rem;
+  font-size: var(--tm-caption-fs, 1rem);
   line-height: 1.45;
   text-wrap: balance;
 }
-@media (min-width: 640px) { .tm-caption { font-size: 1.15rem; } }
-@media (min-width: 1024px) { .tm-caption { font-size: 1.35rem; } }
 .tm-caption-box {
+  --tm-caption-fs: clamp(0.8rem, min(4.2vw, 3.4vh), 1.35rem);
   min-height: 0;
-  max-height: calc(1rem * 1.45 * 3 + 1.25rem);
+  max-height: calc(var(--tm-caption-fs) * 1.45 * 3 + 1.25rem);
   overflow: hidden;
   padding: 0.5rem 1rem 0.6rem;
   border-radius: 1.25rem;
@@ -381,11 +420,113 @@
   mask-image: linear-gradient(to bottom, transparent 0, #000 28%, #000 100%);
   transition: background-color 0.4s ease, box-shadow 0.4s ease;
 }
-@media (min-width: 640px) { .tm-caption-box { max-height: calc(1.15rem * 1.45 * 3 + 1.25rem); } }
-@media (min-width: 1024px) { .tm-caption-box { max-height: calc(1.35rem * 1.45 * 3 + 1.25rem); } }
+/* Em tela baixa a legenda fica em duas linhas para não empurrar os controles */
+@media (max-height: 560px) {
+  .tm-caption-box { max-height: calc(var(--tm-caption-fs) * 1.45 * 2 + 1rem); }
+}
 .tm-caption-box-on {
   background-color: rgba(4, 0, 12, 0.62);
   box-shadow: 0 0 0 1px rgba(168, 85, 247, 0.18), 0 10px 40px rgba(0, 0, 0, 0.45);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
+}
+
+/* =====================================================================
+   Viagem no tempo: HUD que cabe em qualquer tela sem letra sobre letra.
+
+   O `md:` do Tailwind olha só a largura — um celular deitado é largo (e
+   pegaria os tamanhos de desktop) mas tem pouca altura. Aqui os tamanhos
+   e as folgas usam `min(vw, vh)`, então encolhem tanto no celular em pé
+   quanto deitado.
+   ===================================================================== */
+.tm-intro {
+  --tm-safe-t: max(0.85rem, env(safe-area-inset-top));
+  --tm-safe-b: max(0.85rem, env(safe-area-inset-bottom));
+  --tm-safe-x: max(1rem, env(safe-area-inset-left), env(safe-area-inset-right));
+  --tm-line-fs: clamp(0.7rem, min(3.4vw, 2.5vh), 1.125rem);
+  /* Altura reservada para o terminal de baixo (até três linhas de fala) */
+  --tm-terminal-h: calc(var(--tm-line-fs) * 1.4 * 3 + 0.75rem);
+}
+/* Quando o histórico aparece, ele também precisa de espaço */
+@media (min-height: 720px) and (min-width: 768px) {
+  .tm-intro { --tm-terminal-h: calc(var(--tm-line-fs) * 1.4 * 3 + 4rem); }
+}
+
+/* O bloco do ano para onde o terminal começa, em vez de escrever por cima */
+.tm-intro-below {
+  bottom: calc(var(--tm-safe-b) + var(--tm-terminal-h));
+  overflow: hidden;
+}
+
+.tm-intro-title {
+  top: clamp(3.25rem, 13%, 7rem);
+  font-size: clamp(0.95rem, min(5.2vw, 4.4vh), 2.25rem);
+  letter-spacing: clamp(0.12em, 1.2vw, 0.35em);
+}
+
+/* Rótulo/valor do contador de anos e nome na chegada */
+.tm-intro-gap { margin-top: clamp(0.5rem, 2.2vh, 2rem); }
+.tm-intro-gap-sm { margin-top: clamp(0.35rem, 1.6vh, 1rem); }
+.tm-intro-label { font-size: clamp(0.55rem, min(2.6vw, 1.9vh), 0.75rem); }
+.tm-intro-year { font-size: clamp(1.35rem, min(7.5vw, 6.4vh), 3rem); line-height: 1.15; }
+.tm-intro-name { font-size: clamp(1rem, min(5.2vw, 4.2vh), 2.25rem); line-height: 1.15; }
+
+/* Terminal de baixo: no máximo três linhas, sempre acima da área segura */
+.tm-intro-terminal {
+  bottom: calc(var(--tm-safe-b) + 0.25rem);
+  padding-inline: var(--tm-safe-x);
+}
+.tm-intro-line {
+  font-size: var(--tm-line-fs);
+  line-height: 1.4;
+  max-height: calc(1.4em * 3);
+  overflow: hidden;
+}
+/* O histórico só aparece quando sobra altura de verdade */
+.tm-intro-log { display: none; }
+@media (min-height: 720px) and (min-width: 768px) {
+  .tm-intro-log { display: block; }
+}
+
+/* =====================================================================
+   Conversa: nome, cargo e mensagens também encolhem com a altura, e a
+   caixa de legenda absorve a folga que sobrar. Assim o bloco nunca passa
+   por cima dos controles, em qualquer celular e em qualquer orientação.
+   ===================================================================== */
+.tm-convo-below {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 0;
+  overflow: hidden;
+}
+.tm-convo-head { flex-shrink: 0; }
+.tm-convo-gap { margin-top: clamp(0.4rem, 2.2vh, 1.75rem); }
+.tm-convo-name { font-size: clamp(1.05rem, min(6vw, 4.8vh), 2.25rem); line-height: 1.15; }
+.tm-convo-title { font-size: clamp(0.6rem, min(2.9vw, 2.2vh), 0.875rem); }
+.tm-convo-msg { font-size: clamp(0.78rem, min(3.7vw, 2.9vh), 1.125rem); }
+
+/* Detalhes que só aparecem quando sobra altura */
+.tm-convo-era, .tm-convo-hint { display: none; }
+@media (min-height: 620px) and (min-width: 640px) { .tm-convo-era { display: block; } }
+@media (min-height: 700px) and (min-width: 768px) { .tm-convo-hint { display: block; } }
+.tm-convo-controls { padding-bottom: max(0.75rem, env(safe-area-inset-bottom)); }
+@media (min-height: 700px) {
+  .tm-convo-controls { padding-bottom: max(1.75rem, env(safe-area-inset-bottom)); }
+}
+
+/* O aviso de falha tem um botão de ação: precisa aparecer inteiro, sem a
+   máscara nem o teto de altura que servem para a legenda rolando. */
+.tm-caption-box-error {
+  flex: 0 0 auto;
+  max-height: none;
+  overflow: visible;
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
+/* Celular deitado: entre o HUD e o portal não sobra faixa livre. O título e
+   a linha de marca saem — a fase da viagem, que muda, é o que importa ali. */
+@media (max-height: 480px) {
+  .tm-intro-title, .tm-intro-brand { display: none; }
 }

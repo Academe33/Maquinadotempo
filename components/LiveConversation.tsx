@@ -662,25 +662,27 @@ const LiveConversation: React.FC<LiveConversationProps> = ({
       </div>
 
       {/* Nome e legendas, ancorados abaixo do portal */}
-      <div className="tm-stage-below z-10 px-4 flex flex-col items-center text-center" style={{ bottom: 'calc(var(--controls-h, 9rem) + 0.25rem)' }}>
-        <h2 className="mt-4 md:mt-7 text-xl sm:text-3xl md:text-4xl font-bold tracking-tight leading-tight">{character.name}</h2>
-        <p className="text-purple-400 font-medium tracking-wide uppercase text-[10px] md:text-sm mt-0.5 md:mt-1">{character.title}</p>
-        {era && (
-          <p className="hidden sm:block text-cyan-300/70 font-sci text-[10px] md:text-[11px] tracking-[0.3em] uppercase mt-2">
-            Viajante do tempo · {era.label} → {PRESENT_YEAR}
-          </p>
-        )}
+      <div className="tm-stage-below tm-convo-below z-10 px-4 text-center" style={{ bottom: 'calc(var(--controls-h, 9rem) + 0.25rem)' }}>
+        <div className="tm-convo-head tm-convo-gap w-full">
+          <h2 className="tm-convo-name font-bold tracking-tight">{character.name}</h2>
+          <p className="tm-convo-title text-purple-400 font-medium tracking-wide uppercase mt-0.5 md:mt-1 line-clamp-2">{character.title}</p>
+          {era && (
+            <p className="tm-convo-era text-cyan-300/70 font-sci text-[10px] md:text-[11px] tracking-[0.3em] uppercase mt-2">
+              Viajante do tempo · {era.label} → {PRESENT_YEAR}
+            </p>
+          )}
+        </div>
 
-        {/* Legendas: caixa de altura limitada, ancorada embaixo. O texto novo
-            entra por baixo e o antigo sai por cima, com fade. */}
-        <div className={`tm-caption-box mt-2 md:mt-4 w-full max-w-2xl flex flex-col justify-end items-center ${caption ? 'tm-caption-box-on' : ''}`}>
+        {/* Legendas: a caixa toma o que sobra entre o nome e os controles.
+            O texto novo entra por baixo e o antigo sai por cima, com fade. */}
+        <div className={`tm-caption-box mt-2 md:mt-4 w-full max-w-2xl flex-1 min-h-0 flex flex-col justify-end items-center ${caption || error ? 'tm-caption-box-on' : ''} ${error ? 'tm-caption-box-error' : ''}`}>
           <AnimatePresence mode="wait">
             {error ? (
-              <motion.div key="error" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="flex flex-col items-center gap-3">
-                <p className="text-red-200/90 text-sm md:text-base leading-relaxed">{error}</p>
+              <motion.div key="error" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3">
+                <p className="tm-convo-msg text-red-200/90 leading-relaxed">{error}</p>
                 <button
                   onClick={handleRetry}
-                  className="flex items-center gap-2 font-sci text-[10px] md:text-xs tracking-[0.25em] px-4 py-2 rounded-full border border-red-400/40 text-red-100 hover:bg-red-500/20 transition-colors"
+                  className="shrink-0 flex items-center gap-2 font-sci text-[10px] md:text-xs tracking-[0.25em] px-4 py-2 rounded-full border border-red-400/40 text-red-100 hover:bg-red-500/20 transition-colors"
                 >
                   <RefreshCw size={14} /> TENTAR NOVAMENTE
                 </button>
@@ -698,23 +700,23 @@ const LiveConversation: React.FC<LiveConversationProps> = ({
                 <span key={captionTail + captionWords.length} className="tm-caption-word">{captionTail}</span>
               </motion.p>
             ) : hint ? (
-              <motion.p key="hint" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-amber-200/90 text-sm md:text-base">
+              <motion.p key="hint" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="tm-convo-msg text-amber-200/90">
                 {hint}
               </motion.p>
             ) : isHolding ? (
-              <motion.p key="holding" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-cyan-200 text-sm md:text-lg">
+              <motion.p key="holding" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="tm-convo-msg text-cyan-200">
                 Estou ouvindo. Solte o botão quando terminar.
               </motion.p>
             ) : isThinking ? (
-              <motion.p key="thinking" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-slate-300 text-sm md:text-lg">
+              <motion.p key="thinking" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="tm-convo-msg text-slate-300">
                 {userInputText ? <><span className="text-cyan-200/80 italic">Você: {userInputText}</span></> : `${character.name} está pensando…`}
               </motion.p>
             ) : canTalk && !isSpeaking ? (
-              <motion.p key="idle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-slate-400 text-sm md:text-lg">
+              <motion.p key="idle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="tm-convo-msg text-slate-400">
                 Segure o botão abaixo e fale com {character.name}.
               </motion.p>
             ) : !isConnected ? (
-              <motion.p key="connecting" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-slate-500 text-sm md:text-lg">
+              <motion.p key="connecting" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="tm-convo-msg text-slate-500">
                 {arrivalMode ? `Sincronizando a voz de ${character.name} com o presente...` : 'Estabelecendo conexão segura...'}
               </motion.p>
             ) : null}
@@ -723,8 +725,8 @@ const LiveConversation: React.FC<LiveConversationProps> = ({
       </div>
 
       {/* Controles */}
-      <div ref={controlsRef} className="absolute bottom-0 left-0 right-0 z-20 flex flex-col items-center px-4 pt-2 pb-[max(1rem,env(safe-area-inset-bottom))] md:pb-8 bg-gradient-to-t from-[#04000c] via-[#04000c]/80 to-transparent">
-        <div className="flex items-center justify-center gap-5 md:gap-10 pb-6">
+      <div ref={controlsRef} className="tm-convo-controls absolute bottom-0 left-0 right-0 z-20 flex flex-col items-center px-4 pt-2 bg-gradient-to-t from-[#04000c] via-[#04000c]/80 to-transparent">
+        <div className="flex items-center justify-center gap-4 sm:gap-6 md:gap-10 pb-6">
           <button
             onClick={handleClose}
             className="flex items-center gap-2 px-3 py-2.5 rounded-full text-slate-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 transition-colors text-xs md:text-sm"
@@ -756,7 +758,7 @@ const LiveConversation: React.FC<LiveConversationProps> = ({
               style={{ ['--mic' as any]: 0 }}
               aria-pressed={isHolding}
               aria-label="Segure para falar"
-              className={`tm-ptt w-[4.75rem] h-[4.75rem] md:w-[5.5rem] md:h-[5.5rem] rounded-full flex items-center justify-center border-2 disabled:opacity-40 disabled:cursor-not-allowed ${
+              className={`tm-ptt rounded-full flex items-center justify-center border-2 disabled:opacity-40 disabled:cursor-not-allowed ${
                 isHolding
                   ? 'bg-cyan-400 text-[#04000c] border-cyan-200'
                   : isSpeaking
@@ -764,8 +766,7 @@ const LiveConversation: React.FC<LiveConversationProps> = ({
                     : 'bg-cyan-400/15 text-cyan-100 border-cyan-300/60 hover:bg-cyan-400/25'
               }`}
             >
-              <Mic size={30} className="md:hidden" />
-              <Mic size={34} className="hidden md:block" />
+              <Mic className="w-[42%] h-[42%]" />
             </button>
             <span className={`absolute -bottom-6 left-1/2 -translate-x-1/2 font-sci text-[9px] md:text-[10px] tracking-[0.3em] whitespace-nowrap ${isHolding ? 'text-cyan-200' : 'text-slate-400'}`}>
               {talkLabel}
@@ -781,7 +782,7 @@ const LiveConversation: React.FC<LiveConversationProps> = ({
             <span className="hidden sm:inline">Encerrar</span>
           </button>
         </div>
-        <p className="hidden md:block text-[11px] text-slate-500">Dica: no computador, segure a barra de espaço para falar.</p>
+        <p className="tm-convo-hint text-[11px] text-slate-500">Dica: no computador, segure a barra de espaço para falar.</p>
       </div>
     </div>
   );

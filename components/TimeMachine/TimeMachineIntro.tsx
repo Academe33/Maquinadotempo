@@ -239,7 +239,7 @@ const TimeMachineIntro: React.FC<TimeMachineIntroProps> = ({ character, onComple
 
   return (
     <motion.div
-      className={`tm-root tm-stage fixed inset-0 z-[100] bg-[#04000c] text-white overflow-hidden tm-scanlines tm-vignette ${shakeClass}`}
+      className={`tm-root tm-stage tm-intro fixed inset-0 z-[100] bg-[#04000c] text-white overflow-hidden tm-scanlines tm-vignette ${shakeClass}`}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0, transition: { duration: 1 } }}
@@ -254,21 +254,28 @@ const TimeMachineIntro: React.FC<TimeMachineIntroProps> = ({ character, onComple
       <div className="tm-corner br" />
 
       {/* HUD: topo */}
-      <div className="absolute top-7 left-8 right-8 z-10 flex items-start justify-between gap-4">
-        <div className="tm-mono text-[9px] md:text-xs tracking-[0.25em] md:tracking-[0.35em] text-purple-300/80 max-w-[68%]">
-          <div className="whitespace-nowrap">ACADEME · MÁQUINA DO TEMPO</div>
+      <div
+        className="absolute top-0 left-0 right-0 z-20 flex items-start justify-between gap-3"
+        style={{
+          paddingTop: 'calc(var(--tm-safe-t) + 0.75rem)',
+          paddingLeft: 'calc(var(--tm-safe-x) + 1.25rem)',
+          paddingRight: 'calc(var(--tm-safe-x) + 0.25rem)',
+        }}
+      >
+        <div className="tm-mono text-[8px] sm:text-[9px] md:text-xs tracking-[0.15em] sm:tracking-[0.25em] md:tracking-[0.35em] text-purple-300/80 min-w-0 flex-1">
+          <div className="tm-intro-brand truncate">ACADEME · MÁQUINA DO TEMPO</div>
           <motion.div
             key={phase}
             initial={{ opacity: 0, x: -8 }}
             animate={{ opacity: 1, x: 0 }}
-            className="text-cyan-300/80 mt-1"
+            className="text-cyan-300/80 mt-1 truncate"
           >
             ▸ {PHASE_LABEL[phase]}
           </motion.div>
         </div>
         <button
           onClick={handleSkip}
-          className="tm-mono whitespace-nowrap text-[10px] md:text-xs tracking-[0.3em] text-white/50 hover:text-white border border-white/15 hover:border-white/50 rounded-full px-4 py-2 transition-colors"
+          className="tm-mono shrink-0 whitespace-nowrap text-[9px] md:text-xs tracking-[0.2em] md:tracking-[0.3em] text-white/50 hover:text-white border border-white/15 hover:border-white/50 rounded-full px-3 py-2 md:px-4 transition-colors"
         >
           PULAR ›
         </button>
@@ -276,9 +283,9 @@ const TimeMachineIntro: React.FC<TimeMachineIntroProps> = ({ character, onComple
 
       {/* Título */}
       <motion.h1
-        className={`tm-mono absolute top-[13%] md:top-[11%] left-0 right-0 text-center text-xl md:text-4xl font-black uppercase tracking-[0.35em] gradient-text drop-shadow-[0_0_25px_rgba(168,85,247,0.6)] z-10 ${phase === 'boot' ? 'tm-flicker' : ''}`}
-        initial={{ opacity: 0, letterSpacing: '0.9em' }}
-        animate={{ opacity: phase === 'travel' ? 0.35 : 1, letterSpacing: '0.35em' }}
+        className={`tm-mono tm-intro-title absolute left-0 right-0 px-6 text-center font-black uppercase truncate gradient-text drop-shadow-[0_0_25px_rgba(168,85,247,0.6)] z-10 ${phase === 'boot' ? 'tm-flicker' : ''}`}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: phase === 'travel' ? 0.35 : 1 }}
         transition={{ duration: 1.2 }}
       >
         Máquina do Tempo
@@ -382,19 +389,41 @@ const TimeMachineIntro: React.FC<TimeMachineIntroProps> = ({ character, onComple
         </Portal>
       </div>
 
-      {/* Contador de anos, ancorado logo abaixo do portal */}
-      <div className="tm-stage-below z-10 pointer-events-none px-4">
-        <div className="mt-5 md:mt-8 text-center">
-          <div className="tm-mono text-[10px] md:text-xs tracking-[0.5em] text-purple-300/70 mb-1">
+      {/* Contador de anos e barra de energia, ancorados logo abaixo do portal.
+          A energia vive aqui (e não entre o título e o portal) porque naquela
+          faixa não sobra altura no celular — nem em pé, nem deitado. */}
+      <div className="tm-stage-below tm-intro-below z-10 pointer-events-none px-4">
+        <div className="tm-intro-gap text-center">
+          <div className="tm-mono tm-intro-label tracking-[0.35em] sm:tracking-[0.5em] text-purple-300/70 mb-1">
             {phase === 'travel' ? 'ANO ATUAL' : phase === 'arrival' ? 'PRESENTE' : 'DESTINO'}
           </div>
           <div
-            className={`tm-mono text-3xl md:text-5xl font-bold tabular-nums tracking-widest transition-colors ${
+            className={`tm-mono tm-intro-year font-bold tabular-nums tracking-widest transition-colors ${
               phase === 'travel' ? 'text-cyan-200 drop-shadow-[0_0_18px_rgba(34,211,238,0.9)]' : 'text-white drop-shadow-[0_0_12px_rgba(168,85,247,0.8)]'
             }`}
           >
             {yearText}
           </div>
+
+          {/* Barra de energia */}
+          <AnimatePresence>
+            {showEnergy && (
+              <motion.div
+                key="energy"
+                initial={{ opacity: 0, y: -6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                className="tm-intro-gap-sm flex flex-col items-center"
+              >
+                <div className="tm-energy-track h-1.5 md:h-2 w-40 md:w-72 max-w-[70vw] rounded-full overflow-hidden">
+                  <div className="tm-energy-fill h-full rounded-full" style={{ width: `${Math.round(energy * 100)}%`, transition: 'width 120ms linear' }} />
+                </div>
+                <div className="tm-mono tm-intro-label tracking-[0.3em] sm:tracking-[0.4em] text-cyan-300/70 mt-1.5">
+                  ENERGIA<span className="hidden sm:inline"> TEMPORAL</span> {Math.round(energy * 100)}%
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Nome na chegada */}
           <AnimatePresence>
@@ -404,12 +433,12 @@ const TimeMachineIntro: React.FC<TimeMachineIntroProps> = ({ character, onComple
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5, duration: 0.7 }}
-                className="mt-4"
+                className="tm-intro-gap-sm"
               >
-                <div className="text-2xl md:text-4xl font-bold tracking-tight">
+                <div className="tm-intro-name font-bold tracking-tight text-balance">
                   <Typewriter text={character.name} speed={45} />
                 </div>
-                <div className="text-purple-300 uppercase tracking-[0.25em] text-[10px] md:text-sm mt-1">
+                <div className="tm-intro-label text-purple-300 uppercase tracking-[0.2em] mt-1 line-clamp-2">
                   {character.title} · {era.label}
                 </div>
               </motion.div>
@@ -419,32 +448,12 @@ const TimeMachineIntro: React.FC<TimeMachineIntroProps> = ({ character, onComple
         </div>
       </div>
 
-      {/* Barra de energia (logo abaixo do título) */}
-      <AnimatePresence>
-        {showEnergy && (
-          <motion.div
-            key="energy"
-            initial={{ opacity: 0, y: -6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            className="absolute top-[19%] md:top-[18%] left-0 right-0 z-10 flex flex-col items-center pointer-events-none"
-          >
-            <div className="tm-energy-track h-1.5 md:h-2 w-40 md:w-72 rounded-full overflow-hidden">
-              <div className="tm-energy-fill h-full rounded-full" style={{ width: `${Math.round(energy * 100)}%`, transition: 'width 120ms linear' }} />
-            </div>
-            <div className="tm-mono text-[9px] md:text-[10px] tracking-[0.4em] text-cyan-300/70 mt-2">
-              ENERGIA TEMPORAL {Math.round(energy * 100)}%
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* Terminal inferior */}
-      <div className="absolute bottom-8 left-0 right-0 z-10 px-6 text-center pointer-events-none">
-        <div className="tm-mono text-cyan-200 text-xs md:text-lg tracking-wider min-h-[1.6em] tm-cursor drop-shadow-[0_0_10px_rgba(34,211,238,0.5)]">
+      <div className="tm-intro-terminal absolute left-0 right-0 z-10 text-center pointer-events-none">
+        <div className="tm-mono tm-intro-line text-cyan-200 tracking-wider min-h-[1.4em] tm-cursor drop-shadow-[0_0_10px_rgba(34,211,238,0.5)]">
           {machineLine && <Typewriter text={machineLine} />}
         </div>
-        <div className={`hidden md:block mt-3 tm-mono text-[10px] tracking-[0.3em] text-purple-300/45 space-y-0.5 transition-opacity duration-500 ${phase === 'arrival' ? 'opacity-0' : ''}`}>
+        <div className={`tm-intro-log mt-3 tm-mono text-[10px] tracking-[0.3em] text-purple-300/45 space-y-0.5 transition-opacity duration-500 ${phase === 'arrival' ? 'opacity-0' : ''}`}>
           {log.slice(-3).map((line, i) => (
             <div key={`${i}-${line}`} style={{ opacity: 0.45 + i * 0.27 }}>
               {line}
