@@ -237,3 +237,155 @@
   box-shadow: 0 0 0 calc(var(--mic, 0) * 14px) rgba(34, 211, 238, 0.25);
   transition: box-shadow 90ms linear;
 }
+
+/* =====================================================================
+   Palco compartilhado: a mesma geometria do portal na home (modo portal),
+   na viagem e na conversa, para o retrato nunca "pular" entre as telas.
+   --portal-size: diâmetro do círculo central
+   --portal-cy:   posição vertical do centro do portal (em % da altura)
+   ===================================================================== */
+.tm-stage {
+  --portal-size: min(56vw, 18rem, 30vh);
+  --portal-size: min(56vw, 18rem, 30dvh);
+  --portal-cy: 38%;
+}
+@media (min-width: 768px) {
+  .tm-stage {
+    --portal-size: min(56vw, 18rem, 34vh);
+    --portal-size: min(56vw, 18rem, 34dvh);
+    --portal-cy: 41%;
+  }
+}
+/* Telas baixas e largas (celular deitado): portal menor e mais alto */
+@media (max-height: 480px) {
+  .tm-stage {
+    --portal-size: min(40vw, 12rem, 38vh);
+    --portal-size: min(40vw, 12rem, 38dvh);
+    --portal-cy: 40%;
+  }
+}
+.tm-stage-portal {
+  position: absolute;
+  left: 50%;
+  top: var(--portal-cy);
+  width: var(--portal-size);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+}
+.tm-stage-below {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(var(--portal-cy) + var(--portal-size) / 2);
+}
+.tm-stage-above {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(100% - var(--portal-cy) + var(--portal-size) / 2);
+}
+
+/* Anéis girando sozinhos (home e conversa). Sentidos alternados, como na viagem. */
+@keyframes tm-spin-rev { to { transform: rotate(-360deg); } }
+.tm-portal-idle .tm-ring:nth-child(1) { animation: tm-spin 26s linear infinite; }
+.tm-portal-idle .tm-ring:nth-child(2) { animation: tm-spin-rev 48s linear infinite; }
+.tm-portal-idle .tm-ring:nth-child(3) { animation: tm-spin 90s linear infinite; }
+.tm-portal-idle .tm-ring:nth-child(4) { animation: tm-spin-rev 16s linear infinite; }
+.tm-portal-idle .tm-ring { transition: opacity 0.6s ease; }
+
+/* Portal reagindo à voz do personagem (--lvl de 0 a 1) */
+.tm-portal-voice .tm-ring:nth-child(1) { opacity: calc(0.55 + var(--lvl, 0) * 0.45) !important; }
+.tm-portal-voice .tm-ring:nth-child(4) { opacity: calc(0.2 + var(--lvl, 0) * 0.5) !important; }
+
+/* =====================================================================
+   Home em modo portal: carrosséis deslizantes
+   ===================================================================== */
+.tm-carousel {
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  overscroll-behavior-x: contain;
+}
+.tm-carousel::-webkit-scrollbar { display: none; }
+.tm-carousel > * { scroll-snap-align: center; scroll-snap-stop: always; flex-shrink: 0; }
+/* Espaço nas pontas para o primeiro e o último item também centralizarem */
+.tm-carousel-faces { padding-inline: calc(50% - var(--face-w) / 2); }
+.tm-carousel-faces > * { width: var(--face-w); }
+
+.tm-face {
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease, filter 0.35s ease;
+  opacity: 0.45;
+  transform: scale(0.82);
+  filter: grayscale(0.6);
+}
+.tm-face[data-active='true'] {
+  opacity: 1;
+  transform: scale(1);
+  filter: none;
+}
+
+/* Retrato que troca dentro do portal */
+.tm-portal-face { position: absolute; inset: 0; border-radius: 9999px; overflow: hidden; }
+
+/* Botão "segure para falar" */
+.tm-ptt {
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.15s ease, box-shadow 0.12s linear;
+  box-shadow: 0 0 0 calc(var(--mic, 0) * 18px) rgba(34, 211, 238, 0.22), 0 0 32px rgba(34, 211, 238, calc(0.15 + var(--mic, 0) * 0.5));
+}
+.tm-ptt[data-holding='true'] { transform: scale(1.06); }
+@keyframes tm-ptt-breathe {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.35), 0 0 24px rgba(34, 211, 238, 0.2); }
+  50% { box-shadow: 0 0 0 10px rgba(34, 211, 238, 0), 0 0 40px rgba(34, 211, 238, 0.35); }
+}
+.tm-ptt[data-ready='true'][data-holding='false'] { animation: tm-ptt-breathe 2.4s ease-in-out infinite; }
+
+/* Legenda sincronizada: a palavra mais recente entra suave */
+.tm-caption-word { display: inline; animation: tm-word-in 0.18s ease-out both; }
+@keyframes tm-word-in { from { opacity: 0; filter: blur(3px); } to { opacity: 1; filter: blur(0); } }
+
+/* Altura útil que acompanha a barra do navegador no celular */
+.tm-screen { height: 100vh; height: 100dvh; }
+
+/* Home em modo portal: em telas baixas o portal encolhe um pouco para
+   caber setores, nome, carrossel e botão sem rolagem */
+.tm-stage { --home-portal-scale: 1; }
+@media (max-height: 700px) { .tm-stage { --home-portal-scale: 0.82; } }
+@media (max-height: 560px) { .tm-stage { --home-portal-scale: 0.7; } }
+
+/* Legenda da conversa: até ~3 linhas, ancorada embaixo; o que já foi dito
+   sai por cima com fade em vez de empurrar a interface */
+.tm-caption {
+  font-size: 1rem;
+  line-height: 1.45;
+  text-wrap: balance;
+}
+@media (min-width: 640px) { .tm-caption { font-size: 1.15rem; } }
+@media (min-width: 1024px) { .tm-caption { font-size: 1.35rem; } }
+.tm-caption-box {
+  min-height: 0;
+  max-height: calc(1rem * 1.45 * 3 + 1.25rem);
+  overflow: hidden;
+  padding: 0.5rem 1rem 0.6rem;
+  border-radius: 1.25rem;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 28%, #000 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 28%, #000 100%);
+  transition: background-color 0.4s ease, box-shadow 0.4s ease;
+}
+@media (min-width: 640px) { .tm-caption-box { max-height: calc(1.15rem * 1.45 * 3 + 1.25rem); } }
+@media (min-width: 1024px) { .tm-caption-box { max-height: calc(1.35rem * 1.45 * 3 + 1.25rem); } }
+.tm-caption-box-on {
+  background-color: rgba(4, 0, 12, 0.62);
+  box-shadow: 0 0 0 1px rgba(168, 85, 247, 0.18), 0 10px 40px rgba(0, 0, 0, 0.45);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}

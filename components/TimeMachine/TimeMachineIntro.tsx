@@ -7,6 +7,7 @@ import { speakAsMachine, cancelMachineSpeech, warmUpVoices } from '../../service
 import { machineLines } from '../../services/voiceLines';
 import { prefetchVoices } from '../../services/tts';
 import WarpCanvas, { WarpControls } from './WarpCanvas';
+import Portal from './Portal';
 import './timeMachine.css';
 
 type Phase = 'boot' | 'scan' | 'calibrate' | 'charge' | 'travel' | 'arrival';
@@ -238,7 +239,7 @@ const TimeMachineIntro: React.FC<TimeMachineIntroProps> = ({ character, onComple
 
   return (
     <motion.div
-      className={`tm-root fixed inset-0 z-[100] bg-[#04000c] text-white overflow-hidden tm-scanlines tm-vignette ${shakeClass}`}
+      className={`tm-root tm-stage fixed inset-0 z-[100] bg-[#04000c] text-white overflow-hidden tm-scanlines tm-vignette ${shakeClass}`}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0, transition: { duration: 1 } }}
@@ -283,15 +284,10 @@ const TimeMachineIntro: React.FC<TimeMachineIntroProps> = ({ character, onComple
         Máquina do Tempo
       </motion.h1>
 
-      {/* Portal central */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center z-10 pointer-events-none -translate-y-[3%]">
-        <div className="relative" style={{ width: 'min(56vw, 18rem)', aspectRatio: '1' }}>
-          {/* Anéis */}
-          <div ref={el => { ringsRef.current[0] = el; }} className="tm-ring tm-ring-conic" style={{ inset: '-9%' }} />
-          <div ref={el => { ringsRef.current[1] = el; }} className="tm-ring tm-ring-dashed" style={{ inset: '-20%' }} />
-          <div ref={el => { ringsRef.current[2] = el; }} className="tm-ring tm-ring-ticks" style={{ inset: '-33%' }} />
-          <div ref={el => { ringsRef.current[3] = el; }} className="tm-ring tm-ring-conic" style={{ inset: '-46%', opacity: 0.5 }} />
-
+      {/* Portal central: sempre no mesmo ponto da tela que o retrato da
+          conversa e o portal da home, para a transição ser contínua. */}
+      <div className="tm-stage-portal z-10 pointer-events-none">
+        <Portal ringsRef={ringsRef} className="absolute inset-0">
           {/* Núcleo pulsante (sempre presente, mais forte na carga) */}
           <motion.div
             className="absolute rounded-full bg-purple-400 blur-3xl"
@@ -383,10 +379,12 @@ const TimeMachineIntro: React.FC<TimeMachineIntroProps> = ({ character, onComple
               </motion.div>
             )}
           </AnimatePresence>
-        </div>
+        </Portal>
+      </div>
 
-        {/* Contador de anos */}
-        <div className="mt-[14%] md:mt-16 text-center">
+      {/* Contador de anos, ancorado logo abaixo do portal */}
+      <div className="tm-stage-below z-10 pointer-events-none px-4">
+        <div className="mt-5 md:mt-8 text-center">
           <div className="tm-mono text-[10px] md:text-xs tracking-[0.5em] text-purple-300/70 mb-1">
             {phase === 'travel' ? 'ANO ATUAL' : phase === 'arrival' ? 'PRESENTE' : 'DESTINO'}
           </div>

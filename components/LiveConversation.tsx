@@ -3,9 +3,10 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Character } from '../types';
 import { getGeminiClient, encode, decode, decodeAudioData } from '../services/gemini';
 import { LiveServerMessage, Modality } from '@google/genai';
-import { Mic, MicOff, PhoneOff, RefreshCw, ArrowLeft } from 'lucide-react';
+import { Mic, PhoneOff, RefreshCw, ArrowLeft } from 'lucide-react';
 import Logo from './Logo';
 import AmbientWarp from './TimeMachine/AmbientWarp';
+import Portal from './TimeMachine/Portal';
 import { parseEra, PRESENT_YEAR } from '../services/era';
 
 interface LiveConversationProps {
@@ -23,6 +24,74 @@ interface LiveConversationProps {
   greetingReady?: boolean;
 }
 
+/** Trecho da legenda amarrado ao trecho de áudio correspondente */
+interface CaptionSegment {
+  text: string;
+  /** Instante (no relógio do AudioContext de saída) em que o trecho começa a ser falado */
+  start: number;
+  /** Instante em que o trecho termina */
+  end: number;
+}
+
+// Depois de soltar o botão, o último pedaço do microfone ainda está no
+// buffer; continua enviando por este tempo antes de fechar o turno.
+const RELEASE_TAIL_MS = 320;
+// Toque mais curto que isto quase nunca tem fala: mostra a dica de segurar
+const SHORT_PRESS_MS = 350;
+// Quanto tempo a legenda fica na tela depois da última palavra
+const CAPTION_LINGER_S = 2.4;
+
+const isMobileDevice = () =>
+  typeof navigator !== 'undefined' && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+/**
+ * Mantém só o fim do texto: descarta frases inteiras do começo enquanto
+ * couber, e no limite corta em palavra. A legenda mostra o que está sendo
+ * dito agora, não a fala inteira.
+ */
+function trimCaption(text: string, max: number): string {
+  let out = text.trimStart();
+  const sentence = /[.!?…]+["”)]?\s+/g;
+  while (out.length > max) {
+    sentence.lastIndex = 0;
+    const m = sentence.exec(out);
+    if (m && m.index + m[0].length < out.length) {
+      out = out.slice(m.index + m[0].length);
+    } else {
+      break;
+    }
+  }
+  if (out.length > max) {
+    const cut = out.length - max;
+    const space = out.indexOf(' ', cut);
+    out = space >= 0 ? out.slice(space + 1) : out.slice(cut);
+  }
+  return out;
+}
+
+/** Texto já falado até `now`, revelado palavra por palavra */
+function visibleCaption(segments: CaptionSegment[], now: number): string {
+  let full = '';
+  let visibleChars = 0;
+  for (const seg of segments) {
+    if (now >= seg.end) {
+      full += seg.text;
+      visibleChars = full.length;
+    } else if (now > seg.start) {
+      const frac = (now - seg.start) / Math.max(0.05, seg.end - seg.start);
+      visibleChars = full.length + Math.floor(frac * seg.text.length);
+      full += seg.text;
+      break;
+    } else {
+      break;
+    }
+  }
+  if (visibleChars <= 0) return '';
+  // Uma palavra entra inteira assim que começa a ser dita
+  const nextSpace = full.indexOf(' ', visibleChars);
+  return nextSpace === -1 ? full : full.slice(0, nextSpace);
+}
+
 const LiveConversation: React.FC<LiveConversationProps> = ({
   character,
   onClose,
@@ -30,12 +99,15 @@ const LiveConversation: React.FC<LiveConversationProps> = ({
   greetingReady = true,
 }) => {
   const [isConnected, setIsConnected] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isHolding, setIsHolding] = useState(false);
+  const [isThinking, setIsThinking] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [retryKey, setRetryKey] = useState(0);
-  const [currentModelText, setCurrentModelText] = useState("");
-  const [userInputText, setUserInputText] = useState("");
+  const [caption, setCaption] = useState('');
+  const [userInputText, setUserInputText] = useState('');
+  const [hint, setHint] = useState<string | null>(null);
+  const [greetingSent, setGreetingSent] = useState(false);
 
   const audioContextRef = useRef<AudioContext | null>(null);
   const outputAudioContextRef = useRef<AudioContext | null>(null);
@@ -45,19 +117,50 @@ const LiveConversation: React.FC<LiveConversationProps> = ({
   const sessionRef = useRef<any>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const processorRef = useRef<ScriptProcessorNode | null>(null);
-  const textContainerRef = useRef<HTMLDivElement>(null);
   const portraitRef = useRef<HTMLDivElement>(null);
-  const micButtonRef = useRef<HTMLButtonElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const controlsRef = useRef<HTMLDivElement>(null);
+  const talkButtonRef = useRef<HTMLButtonElement>(null);
   const meterRafRef = useRef<number>(0);
-  const isMutedRef = useRef(isMuted);
   const greetingReadyRef = useRef(greetingReady);
   const greetingSentRef = useRef(false);
+  const connectedRef = useRef(false);
+
+  // Legendas sincronizadas
+  const captionSegmentsRef = useRef<CaptionSegment[]>([]);
+  const captionMarkRef = useRef(0);
+  const captionMaxRef = useRef(200);
+
+  // Botão "segure para falar"
+  const holdingRef = useRef(false);
+  const sendUntilRef = useRef(0);
+  const pressStartedAtRef = useRef(0);
+  const releaseTimerRef = useRef<number>(0);
+  const thinkingTimerRef = useRef<number>(0);
+  const hintTimerRef = useRef<number>(0);
 
   const era = arrivalMode ? parseEra(character.description) : null;
 
+  // Limite de texto da legenda: cerca de três linhas em cada largura
   useEffect(() => {
-    isMutedRef.current = isMuted;
-  }, [isMuted]);
+    const update = () => { captionMaxRef.current = window.innerWidth < 640 ? 90 : window.innerWidth < 1024 ? 125 : 150; };
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, []);
+
+  // A altura real dos controles vira a reserva de espaço do bloco de texto,
+  // para a legenda nunca invadir os botões em nenhuma tela
+  useEffect(() => {
+    const controls = controlsRef.current;
+    const root = rootRef.current;
+    if (!controls || !root) return;
+    const apply = () => root.style.setProperty('--controls-h', `${controls.offsetHeight}px`);
+    apply();
+    const ro = new ResizeObserver(apply);
+    ro.observe(controls);
+    return () => ro.disconnect();
+  }, []);
 
   // Dispara a primeira fala do personagem assim que a sessão existir E a
   // animação (se houver) tiver terminado. O microfone só é liberado depois.
@@ -65,6 +168,7 @@ const LiveConversation: React.FC<LiveConversationProps> = ({
     const session = sessionRef.current;
     if (!session || greetingSentRef.current || !greetingReadyRef.current) return;
     greetingSentRef.current = true;
+    setGreetingSent(true);
     const greeting = arrivalMode
       ? `[CHEGADA] A máquina do tempo acabou de materializar você aqui, no ano de ${PRESENT_YEAR}, diante de um estudante. Você está desorientado. Fale agora.`
       : 'Olá, quem é você?';
@@ -79,14 +183,20 @@ const LiveConversation: React.FC<LiveConversationProps> = ({
     if (greetingReady) trySendGreeting();
   }, [greetingReady, trySendGreeting]);
 
-  useEffect(() => {
-    if (textContainerRef.current) {
-      textContainerRef.current.scrollTop = textContainerRef.current.scrollHeight;
-    }
-  }, [currentModelText]);
+  /** Para a voz do personagem na hora e limpa a legenda */
+  const stopPlayback = useCallback(() => {
+    sourcesRef.current.forEach(s => { try { s.stop(); } catch { /* já parou */ } });
+    sourcesRef.current.clear();
+    nextStartTimeRef.current = 0;
+    captionSegmentsRef.current = [];
+    captionMarkRef.current = outputAudioContextRef.current?.currentTime ?? 0;
+    setCaption('');
+  }, []);
 
   const cleanup = useCallback(() => {
     cancelAnimationFrame(meterRafRef.current);
+    clearTimeout(releaseTimerRef.current);
+    clearTimeout(thinkingTimerRef.current);
     if (sessionRef.current) {
       try { sessionRef.current.close(); } catch { /* sessão já encerrada */ }
       sessionRef.current = null;
@@ -107,8 +217,9 @@ const LiveConversation: React.FC<LiveConversationProps> = ({
       outputAudioContextRef.current.close();
       outputAudioContextRef.current = null;
     }
-    sourcesRef.current.forEach(source => source.stop());
+    sourcesRef.current.forEach(source => { try { source.stop(); } catch { /* já parou */ } });
     sourcesRef.current.clear();
+    captionSegmentsRef.current = [];
   }, []);
 
   const createBlob = (data: Float32Array) => {
@@ -123,13 +234,14 @@ const LiveConversation: React.FC<LiveConversationProps> = ({
     };
   };
 
-  // Medidores de volume: o retrato pulsa com a voz do personagem e o botão
-  // do microfone brilha com a voz do usuário. Sem re-render: só variáveis CSS.
+  // Laço de animação: o portal pulsa com a voz do personagem, o botão brilha
+  // com a voz do usuário e a legenda revela as palavras no ritmo do áudio.
   const startMeters = (outputAnalyser: AnalyserNode, inputAnalyser: AnalyserNode) => {
     const outBuf = new Uint8Array(outputAnalyser.fftSize);
     const inBuf = new Uint8Array(inputAnalyser.fftSize);
     let speaking = false;
     let quietFrames = 0;
+    let lastCaption = '';
     const rms = (analyser: AnalyserNode, buf: Uint8Array) => {
       analyser.getByteTimeDomainData(buf);
       let sum = 0;
@@ -141,15 +253,37 @@ const LiveConversation: React.FC<LiveConversationProps> = ({
     };
     const loop = () => {
       const out = Math.min(1, rms(outputAnalyser, outBuf) * 4);
-      const inp = isMutedRef.current ? 0 : Math.min(1, rms(inputAnalyser, inBuf) * 5);
+      const inp = holdingRef.current ? Math.min(1, rms(inputAnalyser, inBuf) * 5) : 0;
       portraitRef.current?.style.setProperty('--lvl', out.toFixed(3));
-      micButtonRef.current?.style.setProperty('--mic', inp.toFixed(3));
+      talkButtonRef.current?.style.setProperty('--mic', inp.toFixed(3));
       if (out > 0.04) {
         quietFrames = 0;
         if (!speaking) { speaking = true; setIsSpeaking(true); }
       } else if (speaking && ++quietFrames > 25) {
         speaking = false;
         setIsSpeaking(false);
+      }
+
+      // Legenda sincronizada
+      const ctx = outputAudioContextRef.current;
+      const segments = captionSegmentsRef.current;
+      if (ctx && segments.length > 0) {
+        const now = ctx.currentTime;
+        const last = segments[segments.length - 1];
+        let next: string;
+        if (now > last.end + CAPTION_LINGER_S) {
+          captionSegmentsRef.current = [];
+          next = '';
+        } else {
+          next = trimCaption(visibleCaption(segments, now), captionMaxRef.current);
+        }
+        if (next !== lastCaption) {
+          lastCaption = next;
+          setCaption(next);
+        }
+      } else if (lastCaption) {
+        lastCaption = '';
+        setCaption('');
       }
       meterRafRef.current = requestAnimationFrame(loop);
     };
@@ -174,10 +308,9 @@ const LiveConversation: React.FC<LiveConversationProps> = ({
         audioContextRef.current = inputCtx;
         outputAudioContextRef.current = outputCtx;
 
-        // Setup Master Volume Gain for louder mobile output
+        // Ganho de saída maior no celular, onde o alto-falante é fraco
         const gainNode = outputCtx.createGain();
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        gainNode.gain.value = isMobile ? 3.0 : 1.0; // Boost volume 3x on mobile, standard on desktop
+        gainNode.gain.value = isMobileDevice() ? 3.0 : 1.0;
         gainNode.connect(outputCtx.destination);
         gainNodeRef.current = gainNode;
 
@@ -195,16 +328,20 @@ const LiveConversation: React.FC<LiveConversationProps> = ({
           model: 'gemini-2.5-flash-native-audio-preview-12-2025',
           callbacks: {
             onopen: () => {
+              if (cancelled) return;
+              connectedRef.current = true;
               setIsConnected(true);
               const source = inputCtx.createMediaStreamSource(stream);
               source.connect(inputAnalyser);
-              // Reduced buffer size to 4096 to lower latency (approx 256ms at 16kHz)
+              // Buffer de 4096 amostras (~256 ms a 16 kHz) para latência baixa
               const scriptProcessor = inputCtx.createScriptProcessor(4096, 1, 1);
               processorRef.current = scriptProcessor;
 
               scriptProcessor.onaudioprocess = (e) => {
-                // Segura o microfone até o personagem ter feito a primeira fala
-                if (cancelled || closed || isMutedRef.current || !greetingSentRef.current) return;
+                // Só envia áudio enquanto o botão está pressionado (mais a
+                // cauda curta depois de soltar, para não cortar a última palavra)
+                const sending = holdingRef.current || performance.now() < sendUntilRef.current;
+                if (cancelled || closed || !sending || !greetingSentRef.current) return;
                 const inputData = e.inputBuffer.getChannelData(0);
                 const pcmBlob = createBlob(inputData);
                 sessionPromise.then((session) => {
@@ -214,8 +351,7 @@ const LiveConversation: React.FC<LiveConversationProps> = ({
 
               source.connect(scriptProcessor);
 
-              // Connect scriptProcessor to a mute gain node to keep it alive
-              // but prevent audio feedback/monitoring
+              // Mantém o processador vivo sem devolver o microfone ao alto-falante
               const muteNode = inputCtx.createGain();
               muteNode.gain.value = 0;
               scriptProcessor.connect(muteNode);
@@ -224,6 +360,7 @@ const LiveConversation: React.FC<LiveConversationProps> = ({
               startMeters(outputAnalyser, inputAnalyser);
             },
             onmessage: async (message: LiveServerMessage) => {
+              if (cancelled) return;
               const base64Audio = message.serverContent?.modelTurn?.parts?.[0]?.inlineData?.data;
               if (base64Audio && outputAudioContextRef.current) {
                 const ctx = outputAudioContextRef.current;
@@ -240,34 +377,56 @@ const LiveConversation: React.FC<LiveConversationProps> = ({
                 source.start(nextStartTimeRef.current);
                 nextStartTimeRef.current += audioBuffer.duration;
                 sourcesRef.current.add(source);
+                clearTimeout(thinkingTimerRef.current);
+                setIsThinking(false);
+                setUserInputText('');
               }
 
               if (message.serverContent?.interrupted) {
-                sourcesRef.current.forEach(s => s.stop());
-                sourcesRef.current.clear();
-                nextStartTimeRef.current = 0;
+                stopPlayback();
               }
 
-              if (message.serverContent?.inputTranscription) {
-                setUserInputText(message.serverContent.inputTranscription.text);
+              if (message.serverContent?.inputTranscription?.text) {
+                setUserInputText(prev => (prev + message.serverContent!.inputTranscription!.text).slice(-240));
               }
-              if (message.serverContent?.outputTranscription) {
-                setCurrentModelText(prev => prev + message.serverContent!.outputTranscription!.text);
+
+              // A transcrição chega logo depois do áudio a que se refere. Amarra
+              // o texto ao trecho da linha do tempo de reprodução que ainda não
+              // tem legenda: do fim do trecho anterior até o fim do áudio agendado.
+              const spoken = message.serverContent?.outputTranscription?.text;
+              if (spoken && outputAudioContextRef.current) {
+                const ctx = outputAudioContextRef.current;
+                const now = ctx.currentTime;
+                const start = Math.max(captionMarkRef.current, now);
+                const scheduledEnd = nextStartTimeRef.current;
+                // Sem áudio agendado ainda: estima pela quantidade de texto (~15 caracteres/s)
+                const end = scheduledEnd > start + 0.05 ? scheduledEnd : start + spoken.length / 15;
+                captionSegmentsRef.current.push({ text: spoken, start, end });
+                captionMarkRef.current = end;
               }
+
               if (message.serverContent?.turnComplete) {
-                setTimeout(() => {
-                   setUserInputText("");
-                   setCurrentModelText("");
-                }, 4000);
+                clearTimeout(thinkingTimerRef.current);
+                setIsThinking(false);
               }
             },
             onerror: (e) => console.error('Gemini Live Error:', e),
-            onclose: () => { closed = true; setIsConnected(false); },
+            onclose: () => {
+              closed = true;
+              if (cancelled) return;
+              connectedRef.current = false;
+              setIsConnected(false);
+            },
           },
           config: {
             responseModalities: [Modality.AUDIO],
             inputAudioTranscription: {},
             outputAudioTranscription: {},
+            // O usuário controla o turno pelo botão: sem detecção automática de
+            // voz, ruído de fundo e eco não interrompem mais o personagem.
+            realtimeInputConfig: {
+              automaticActivityDetection: { disabled: true },
+            },
             speechConfig: {
               voiceConfig: { prebuiltVoiceConfig: { voiceName: character.voiceName || 'Zephyr' } },
             },
@@ -291,6 +450,7 @@ const LiveConversation: React.FC<LiveConversationProps> = ({
             4. Se lhe perguntarem sobre coisas do futuro (após sua morte/época), reaja com curiosidade, confusão ou fascínio, dependendo da sua personalidade, mas mantenha a perspectiva do seu tempo, a menos que sua instrução diga que você tem consciência de ser uma consciência histórica preservada.
             5. O objetivo é que o usuário esqueça que está falando com um computador. A imersão deve ser PERFEITA.
             6. Responda de forma concisa e natural para uma conversa por voz.
+            7. Se receber um turno sem fala compreensível (silêncio ou ruído), diga apenas, com naturalidade, que não conseguiu ouvir e peça para repetir.
 
             Você está vivo agora, conversando com alguém. Aja naturalmente.`,
           },
@@ -327,6 +487,12 @@ const LiveConversation: React.FC<LiveConversationProps> = ({
 
     let cancelled = false;
     greetingSentRef.current = false;
+    setGreetingSent(false);
+    holdingRef.current = false;
+    setIsHolding(false);
+    setIsThinking(false);
+    setCaption('');
+    setUserInputText('');
     initSession();
     return () => {
       cancelled = true;
@@ -334,6 +500,78 @@ const LiveConversation: React.FC<LiveConversationProps> = ({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [character, retryKey]);
+
+  // ---------- Segure para falar ----------
+
+  const showHint = useCallback((text: string) => {
+    clearTimeout(hintTimerRef.current);
+    setHint(text);
+    hintTimerRef.current = window.setTimeout(() => setHint(null), 3200);
+  }, []);
+
+  const startTalking = useCallback(() => {
+    const session = sessionRef.current;
+    if (!session || !connectedRef.current || !greetingSentRef.current || holdingRef.current) return;
+    clearTimeout(releaseTimerRef.current);
+    holdingRef.current = true;
+    pressStartedAtRef.current = performance.now();
+    setIsHolding(true);
+    setIsThinking(false);
+    setUserInputText('');
+    setHint(null);
+    // O usuário quis falar: o personagem se cala na hora (o servidor confirma
+    // com "interrupted" logo em seguida)
+    stopPlayback();
+    try { session.sendRealtimeInput({ activityStart: {} }); } catch (err) { console.warn('activityStart falhou', err); }
+  }, [stopPlayback]);
+
+  const stopTalking = useCallback(() => {
+    if (!holdingRef.current) return;
+    holdingRef.current = false;
+    setIsHolding(false);
+    const held = performance.now() - pressStartedAtRef.current;
+    if (held < SHORT_PRESS_MS) showHint('Segure o botão enquanto fala e solte quando terminar.');
+    // Deixa o último buffer do microfone sair antes de fechar o turno
+    sendUntilRef.current = performance.now() + RELEASE_TAIL_MS;
+    setIsThinking(true);
+    releaseTimerRef.current = window.setTimeout(() => {
+      const session = sessionRef.current;
+      if (!session || !connectedRef.current) { setIsThinking(false); return; }
+      try { session.sendRealtimeInput({ activityEnd: {} }); } catch (err) { console.warn('activityEnd falhou', err); }
+      // Se a resposta não vier, não fica "pensando" para sempre
+      clearTimeout(thinkingTimerRef.current);
+      thinkingTimerRef.current = window.setTimeout(() => setIsThinking(false), 12000);
+    }, RELEASE_TAIL_MS);
+  }, [showHint]);
+
+  // Barra de espaço funciona como o botão (no computador)
+  useEffect(() => {
+    const isTyping = (t: EventTarget | null) => {
+      const el = t as HTMLElement | null;
+      return !!el && /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName);
+    };
+    const down = (e: KeyboardEvent) => {
+      if (e.code !== 'Space' || e.repeat || isTyping(e.target)) return;
+      e.preventDefault();
+      startTalking();
+    };
+    const up = (e: KeyboardEvent) => {
+      if (e.code !== 'Space') return;
+      e.preventDefault();
+      stopTalking();
+    };
+    const blur = () => stopTalking();
+    window.addEventListener('keydown', down);
+    window.addEventListener('keyup', up);
+    window.addEventListener('blur', blur);
+    return () => {
+      window.removeEventListener('keydown', down);
+      window.removeEventListener('keyup', up);
+      window.removeEventListener('blur', blur);
+    };
+  }, [startTalking, stopTalking]);
+
+  useEffect(() => () => { clearTimeout(hintTimerRef.current); }, []);
 
   const handleClose = () => {
     onClose();
@@ -346,26 +584,47 @@ const LiveConversation: React.FC<LiveConversationProps> = ({
     setRetryKey(k => k + 1);
   };
 
+  const canTalk = isConnected && greetingSent && !error;
+
   const statusLabel = error
     ? 'FALHA NA CONEXÃO'
     : !isConnected
       ? 'SINCRONIZANDO'
-      : isSpeaking
-        ? 'FALANDO'
-        : isMuted
-          ? 'MICROFONE MUDO'
-          : 'OUVINDO VOCÊ';
+      : isHolding
+        ? 'OUVINDO VOCÊ'
+        : isThinking
+          ? 'PENSANDO'
+          : isSpeaking
+            ? 'FALANDO'
+            : canTalk
+              ? 'PRONTO'
+              : 'CHEGANDO';
+
+  const talkLabel = !canTalk
+    ? 'AGUARDE'
+    : isHolding
+      ? 'SOLTE PARA ENVIAR'
+      : isThinking
+        ? 'PENSANDO…'
+        : isSpeaking
+          ? 'SEGURE PARA INTERROMPER'
+          : 'SEGURE PARA FALAR';
+
+  // Última palavra da legenda entra com um leve fade
+  const captionWords = caption ? caption.split(' ') : [];
+  const captionHead = captionWords.slice(0, -1).join(' ');
+  const captionTail = captionWords[captionWords.length - 1] ?? '';
 
   return (
-    <div className="fixed inset-0 bg-[#04000c] z-50 flex flex-col overflow-hidden text-white">
+    <div ref={rootRef} className="tm-stage tm-screen fixed inset-0 bg-[#04000c] z-50 overflow-hidden text-white select-none">
       {greetingReady && <AmbientWarp intensity={isSpeaking ? 0.11 : 0.045} className="absolute inset-0 w-full h-full pointer-events-none" />}
 
       {/* Barra superior */}
-      <div className="relative z-10 flex items-center justify-between px-5 pt-5 md:px-8 md:pt-6">
+      <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-4 pt-[max(1rem,env(safe-area-inset-top))] md:px-8 md:pt-6">
         <Logo />
         <div className="flex items-center gap-2 font-sci text-[9px] md:text-[11px] tracking-[0.25em]">
           <span className={`flex items-center gap-2 border rounded-full px-3 py-1.5 bg-black/40 ${error ? 'border-red-500/40 text-red-300' : 'border-purple-500/30 text-purple-200/80'}`}>
-            <span className={`w-1.5 h-1.5 rounded-full ${error ? 'bg-red-500' : isConnected ? 'bg-green-400 tm-dot-online' : 'bg-amber-400 animate-pulse'}`} />
+            <span className={`w-1.5 h-1.5 rounded-full ${error ? 'bg-red-500' : isHolding ? 'bg-cyan-300 tm-dot-online' : isConnected ? 'bg-green-400 tm-dot-online' : 'bg-amber-400 animate-pulse'}`} />
             {statusLabel}
           </span>
           {era && (
@@ -376,16 +635,14 @@ const LiveConversation: React.FC<LiveConversationProps> = ({
         </div>
       </div>
 
-      {/* Conteúdo principal */}
-      <div className="relative z-10 flex-1 min-h-0 flex flex-col items-center justify-center px-4 gap-5 md:gap-7">
-        {/* Retrato */}
-        <div ref={portraitRef} className="relative" style={{ ['--lvl' as any]: 0 }}>
-          <div className="absolute -inset-4 md:-inset-6 rounded-full border-2 border-purple-400/60 tm-voice-ring" />
-          <div className="absolute -inset-8 md:-inset-12 rounded-full border border-dashed border-cyan-300/25 tm-spin-slower" />
-          {isConnected && !isMuted && !isSpeaking && (
-            <div className="absolute -inset-4 rounded-full border-4 border-purple-500/20 ring-animation" />
+      {/* Portal com o retrato: mesma posição e tamanho da viagem */}
+      <div ref={portraitRef} className="tm-stage-portal z-10" style={{ ['--lvl' as any]: 0 }}>
+        <Portal className={`absolute inset-0 tm-portal-voice ${isConnected ? '' : 'opacity-40'}`} ringOpacity={0.7}>
+          <div className="absolute -inset-[7%] rounded-full border-2 border-purple-400/60 tm-voice-ring" />
+          {isConnected && !isSpeaking && !isHolding && (
+            <div className="absolute -inset-[7%] rounded-full border-4 border-purple-500/20 ring-animation" />
           )}
-          <div className={`tm-voice-portrait w-44 h-44 sm:w-56 sm:h-56 md:w-72 md:h-72 rounded-full overflow-hidden border-4 shadow-2xl bg-[#151515] transition-[border-color,filter,opacity] duration-700 ${isConnected ? 'border-purple-400 shadow-purple-500/30' : 'border-white/10 grayscale opacity-50'}`}>
+          <div className={`tm-voice-portrait absolute inset-0 rounded-full overflow-hidden border-4 shadow-2xl bg-[#151515] transition-[border-color,filter,opacity] duration-700 ${isConnected ? 'border-purple-400 shadow-purple-500/30' : 'border-white/10 grayscale opacity-50'}`}>
             <img
               src={character.image}
               alt={character.name}
@@ -399,95 +656,132 @@ const LiveConversation: React.FC<LiveConversationProps> = ({
             />
           </div>
           {isConnected && (
-            <div className="absolute bottom-2 right-2 md:bottom-4 md:right-4 bg-green-500 w-5 h-5 md:w-6 md:h-6 rounded-full border-4 border-[#04000c] shadow-lg" />
+            <div className={`absolute bottom-[4%] right-[4%] w-5 h-5 md:w-6 md:h-6 rounded-full border-4 border-[#04000c] shadow-lg transition-colors ${isHolding ? 'bg-cyan-300' : 'bg-green-500'}`} />
           )}
-        </div>
+        </Portal>
+      </div>
 
-        <div className="text-center max-w-3xl w-full">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight">{character.name}</h2>
-          <p className="text-purple-400 font-medium tracking-wide uppercase text-[11px] md:text-sm mt-1">{character.title}</p>
-          {era && (
-            <p className="text-cyan-300/70 font-sci text-[10px] md:text-[11px] tracking-[0.3em] uppercase mt-2">
-              Viajante do tempo · {era.label} → {PRESENT_YEAR}
-            </p>
-          )}
+      {/* Nome e legendas, ancorados abaixo do portal */}
+      <div className="tm-stage-below z-10 px-4 flex flex-col items-center text-center" style={{ bottom: 'calc(var(--controls-h, 9rem) + 0.25rem)' }}>
+        <h2 className="mt-4 md:mt-7 text-xl sm:text-3xl md:text-4xl font-bold tracking-tight leading-tight">{character.name}</h2>
+        <p className="text-purple-400 font-medium tracking-wide uppercase text-[10px] md:text-sm mt-0.5 md:mt-1">{character.title}</p>
+        {era && (
+          <p className="hidden sm:block text-cyan-300/70 font-sci text-[10px] md:text-[11px] tracking-[0.3em] uppercase mt-2">
+            Viajante do tempo · {era.label} → {PRESENT_YEAR}
+          </p>
+        )}
 
-          {/* Legendas */}
-          <div className="mt-4 md:mt-6 min-h-[5.5rem] md:min-h-[6.5rem] flex items-center justify-center px-2 w-full">
-            <div
-              ref={textContainerRef}
-              className="max-w-2xl w-full max-h-[6.5rem] md:max-h-[7.5rem] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none'] scroll-smooth"
-            >
-              <AnimatePresence mode="wait">
-                {error ? (
-                  <motion.div key="error" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="flex flex-col items-center gap-3">
-                    <p className="text-red-200/90 text-sm md:text-base leading-relaxed">{error}</p>
-                    <button
-                      onClick={handleRetry}
-                      className="flex items-center gap-2 font-sci text-[10px] md:text-xs tracking-[0.25em] px-4 py-2 rounded-full border border-red-400/40 text-red-100 hover:bg-red-500/20 transition-colors"
-                    >
-                      <RefreshCw size={14} /> TENTAR NOVAMENTE
-                    </button>
-                  </motion.div>
-                ) : currentModelText ? (
-                  <motion.p key="model" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="text-lg sm:text-xl md:text-2xl text-white font-medium leading-relaxed drop-shadow-sm text-center">
-                    {currentModelText}
-                  </motion.p>
-                ) : userInputText ? (
-                  <motion.p key="user" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-base md:text-xl text-cyan-200/80 italic">
-                    Você: {userInputText}
-                  </motion.p>
-                ) : isConnected ? (
-                  <motion.p key="idle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-slate-400 text-sm md:text-lg animate-pulse">
-                    {isMuted
-                      ? 'Microfone silenciado. Toque no microfone para voltar a falar.'
-                      : arrivalMode
-                        ? `Pode falar. ${character.name} está ouvindo você.`
-                        : 'Estou ouvindo você...'}
-                  </motion.p>
-                ) : (
-                  <motion.p key="connecting" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-slate-500 text-sm md:text-lg">
-                    {arrivalMode ? `Sincronizando a voz de ${character.name} com o presente...` : 'Estabelecendo conexão segura...'}
-                  </motion.p>
-                )}
-              </AnimatePresence>
-            </div>
-          </div>
+        {/* Legendas: caixa de altura limitada, ancorada embaixo. O texto novo
+            entra por baixo e o antigo sai por cima, com fade. */}
+        <div className={`tm-caption-box mt-2 md:mt-4 w-full max-w-2xl flex flex-col justify-end items-center ${caption ? 'tm-caption-box-on' : ''}`}>
+          <AnimatePresence mode="wait">
+            {error ? (
+              <motion.div key="error" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="flex flex-col items-center gap-3">
+                <p className="text-red-200/90 text-sm md:text-base leading-relaxed">{error}</p>
+                <button
+                  onClick={handleRetry}
+                  className="flex items-center gap-2 font-sci text-[10px] md:text-xs tracking-[0.25em] px-4 py-2 rounded-full border border-red-400/40 text-red-100 hover:bg-red-500/20 transition-colors"
+                >
+                  <RefreshCw size={14} /> TENTAR NOVAMENTE
+                </button>
+              </motion.div>
+            ) : caption ? (
+              <motion.p
+                key="caption"
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, transition: { duration: 0.5 } }}
+                aria-live="polite"
+                className="tm-caption text-white font-medium drop-shadow-sm text-center"
+              >
+                {captionHead}{captionHead ? ' ' : ''}
+                <span key={captionTail + captionWords.length} className="tm-caption-word">{captionTail}</span>
+              </motion.p>
+            ) : hint ? (
+              <motion.p key="hint" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-amber-200/90 text-sm md:text-base">
+                {hint}
+              </motion.p>
+            ) : isHolding ? (
+              <motion.p key="holding" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-cyan-200 text-sm md:text-lg">
+                Estou ouvindo. Solte o botão quando terminar.
+              </motion.p>
+            ) : isThinking ? (
+              <motion.p key="thinking" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-slate-300 text-sm md:text-lg">
+                {userInputText ? <><span className="text-cyan-200/80 italic">Você: {userInputText}</span></> : `${character.name} está pensando…`}
+              </motion.p>
+            ) : canTalk && !isSpeaking ? (
+              <motion.p key="idle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-slate-400 text-sm md:text-lg">
+                Segure o botão abaixo e fale com {character.name}.
+              </motion.p>
+            ) : !isConnected ? (
+              <motion.p key="connecting" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-slate-500 text-sm md:text-lg">
+                {arrivalMode ? `Sincronizando a voz de ${character.name} com o presente...` : 'Estabelecendo conexão segura...'}
+              </motion.p>
+            ) : null}
+          </AnimatePresence>
         </div>
       </div>
 
       {/* Controles */}
-      <div className="relative z-10 flex justify-center px-4 pt-2 pb-[max(1.5rem,env(safe-area-inset-bottom))] md:pb-10">
-        <div className="flex items-center gap-4 md:gap-8 px-4 md:px-8 py-2.5 md:py-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-full shadow-2xl">
+      <div ref={controlsRef} className="absolute bottom-0 left-0 right-0 z-20 flex flex-col items-center px-4 pt-2 pb-[max(1rem,env(safe-area-inset-bottom))] md:pb-8 bg-gradient-to-t from-[#04000c] via-[#04000c]/80 to-transparent">
+        <div className="flex items-center justify-center gap-5 md:gap-10 pb-6">
           <button
             onClick={handleClose}
-            className="flex items-center gap-2 px-3 py-2 rounded-full text-slate-300 hover:text-white hover:bg-white/10 transition-colors text-xs md:text-sm"
+            className="flex items-center gap-2 px-3 py-2.5 rounded-full text-slate-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 transition-colors text-xs md:text-sm"
             title="Voltar para a escolha de viajantes"
           >
             <ArrowLeft size={18} />
             <span className="hidden sm:inline">Voltar</span>
           </button>
 
-          <button
-            ref={micButtonRef}
-            onClick={() => setIsMuted(!isMuted)}
-            style={{ ['--mic' as any]: 0 }}
-            className={`tm-mic-glow p-4 md:p-5 rounded-full transition-colors duration-300 transform active:scale-90 ${isMuted ? 'bg-red-500/20 text-red-400 border border-red-500/40' : 'bg-cyan-400/15 text-cyan-100 border border-cyan-300/40 hover:bg-cyan-400/25'}`}
-            title={isMuted ? "Ativar Microfone" : "Silenciar Microfone"}
-            aria-pressed={isMuted}
-          >
-            {isMuted ? <MicOff size={28} /> : <Mic size={28} />}
-          </button>
+          <div className="relative flex flex-col items-center">
+            <button
+              ref={talkButtonRef}
+              type="button"
+              disabled={!canTalk}
+              data-holding={isHolding}
+              data-ready={canTalk && !isSpeaking && !isThinking}
+              onPointerDown={e => {
+                if (e.button !== 0 && e.pointerType === 'mouse') return;
+                e.preventDefault();
+                try { e.currentTarget.setPointerCapture(e.pointerId); } catch { /* sem captura */ }
+                startTalking();
+              }}
+              onPointerUp={stopTalking}
+              onPointerCancel={stopTalking}
+              onLostPointerCapture={stopTalking}
+              onContextMenu={e => e.preventDefault()}
+              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); startTalking(); } }}
+              onKeyUp={e => { if (e.key === 'Enter') { e.preventDefault(); stopTalking(); } }}
+              style={{ ['--mic' as any]: 0 }}
+              aria-pressed={isHolding}
+              aria-label="Segure para falar"
+              className={`tm-ptt w-[4.75rem] h-[4.75rem] md:w-[5.5rem] md:h-[5.5rem] rounded-full flex items-center justify-center border-2 disabled:opacity-40 disabled:cursor-not-allowed ${
+                isHolding
+                  ? 'bg-cyan-400 text-[#04000c] border-cyan-200'
+                  : isSpeaking
+                    ? 'bg-purple-500/20 text-purple-100 border-purple-300/60'
+                    : 'bg-cyan-400/15 text-cyan-100 border-cyan-300/60 hover:bg-cyan-400/25'
+              }`}
+            >
+              <Mic size={30} className="md:hidden" />
+              <Mic size={34} className="hidden md:block" />
+            </button>
+            <span className={`absolute -bottom-6 left-1/2 -translate-x-1/2 font-sci text-[9px] md:text-[10px] tracking-[0.3em] whitespace-nowrap ${isHolding ? 'text-cyan-200' : 'text-slate-400'}`}>
+              {talkLabel}
+            </span>
+          </div>
 
           <button
             onClick={handleClose}
-            className="flex items-center gap-2 p-4 md:px-5 md:py-4 bg-red-600 hover:bg-red-700 text-white rounded-full transition-colors duration-300 transform active:scale-95 shadow-xl shadow-red-600/30 text-xs md:text-sm font-semibold"
+            className="flex items-center gap-2 p-3 md:px-5 md:py-3 bg-red-600 hover:bg-red-700 text-white rounded-full transition-colors duration-300 transform active:scale-95 shadow-xl shadow-red-600/30 text-xs md:text-sm font-semibold"
             title="Encerrar e devolver ao passado"
           >
-            <PhoneOff size={22} />
+            <PhoneOff size={20} />
             <span className="hidden sm:inline">Encerrar</span>
           </button>
         </div>
+        <p className="hidden md:block text-[11px] text-slate-500">Dica: no computador, segure a barra de espaço para falar.</p>
       </div>
     </div>
   );
