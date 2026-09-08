@@ -1,0 +1,391 @@
+/* Efeitos visuais da Máquina do Tempo */
+
+.tm-root {
+  font-family: 'Inter', sans-serif;
+  --tm-accent: #a855f7;
+  --tm-accent-2: #22d3ee;
+}
+
+.tm-mono {
+  font-family: 'Orbitron', 'Courier New', monospace;
+}
+
+/* Linhas de varredura de monitor antigo */
+.tm-scanlines::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.035) 0px,
+    rgba(255, 255, 255, 0.035) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  mix-blend-mode: overlay;
+  z-index: 5;
+}
+
+/* Vinheta escura nas bordas */
+.tm-vignette::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 45%, rgba(0, 0, 0, 0.75) 100%);
+  z-index: 4;
+}
+
+/* Tremor da tela durante carga e viagem */
+@keyframes tm-shake {
+  0%   { transform: translate(0, 0) rotate(0deg); }
+  10%  { transform: translate(-3px, 2px) rotate(-0.2deg); }
+  20%  { transform: translate(3px, -1px) rotate(0.2deg); }
+  30%  { transform: translate(-2px, -3px) rotate(0deg); }
+  40%  { transform: translate(2px, 3px) rotate(0.3deg); }
+  50%  { transform: translate(-3px, 1px) rotate(-0.3deg); }
+  60%  { transform: translate(3px, 2px) rotate(0deg); }
+  70%  { transform: translate(-1px, -2px) rotate(0.2deg); }
+  80%  { transform: translate(1px, 3px) rotate(-0.2deg); }
+  90%  { transform: translate(-2px, -1px) rotate(0deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+.tm-shake-soft { animation: tm-shake 0.45s infinite linear; }
+.tm-shake-hard { animation: tm-shake 0.14s infinite linear; }
+
+/* Cintilação de tela ligando */
+@keyframes tm-flicker {
+  0%, 100% { opacity: 1; }
+  8%  { opacity: 0.3; }
+  12% { opacity: 1; }
+  20% { opacity: 0.6; }
+  24% { opacity: 1; }
+  55% { opacity: 0.85; }
+  60% { opacity: 1; }
+}
+.tm-flicker { animation: tm-flicker 1.4s ease-in-out 1; }
+
+/* Aberração cromática: cópias vermelha e ciano deslocadas */
+@keyframes tm-aberration-r {
+  0%, 100% { transform: translate(-4px, 0); }
+  25% { transform: translate(-8px, 2px); }
+  50% { transform: translate(-2px, -2px); }
+  75% { transform: translate(-6px, 1px); }
+}
+@keyframes tm-aberration-c {
+  0%, 100% { transform: translate(4px, 0); }
+  25% { transform: translate(7px, -2px); }
+  50% { transform: translate(2px, 2px); }
+  75% { transform: translate(6px, -1px); }
+}
+.tm-ghost {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  mix-blend-mode: screen;
+  opacity: 0.55;
+  pointer-events: none;
+}
+.tm-ghost-r {
+  filter: saturate(6) hue-rotate(-40deg) brightness(1.2);
+  animation: tm-aberration-r 0.18s infinite steps(2);
+}
+.tm-ghost-c {
+  filter: saturate(6) hue-rotate(150deg) brightness(1.2);
+  animation: tm-aberration-c 0.21s infinite steps(2);
+}
+
+/* Fatias de glitch cortando a imagem */
+@keyframes tm-glitch-slice {
+  0%   { clip-path: inset(10% 0 80% 0); transform: translateX(-12px); opacity: 0.9; }
+  15%  { clip-path: inset(40% 0 45% 0); transform: translateX(10px);  opacity: 0.7; }
+  30%  { clip-path: inset(70% 0 10% 0); transform: translateX(-8px);  opacity: 0.9; }
+  45%  { clip-path: inset(25% 0 60% 0); transform: translateX(14px);  opacity: 0.6; }
+  60%  { clip-path: inset(55% 0 30% 0); transform: translateX(-10px); opacity: 0.8; }
+  75%  { clip-path: inset(5% 0 85% 0);  transform: translateX(6px);   opacity: 0.7; }
+  100% { clip-path: inset(85% 0 5% 0);  transform: translateX(-6px);  opacity: 0.9; }
+}
+.tm-glitch-slice {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  animation: tm-glitch-slice 0.5s infinite steps(1);
+}
+.tm-glitch-slice.delay { animation-delay: 0.25s; animation-duration: 0.37s; }
+
+/* Linha de varredura (scan) sobre a silhueta durante a localização */
+@keyframes tm-scanline {
+  0%   { top: -10%; }
+  100% { top: 110%; }
+}
+.tm-scan-beam {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 14%;
+  background: linear-gradient(to bottom, transparent, rgba(34, 211, 238, 0.65), transparent);
+  box-shadow: 0 0 30px rgba(34, 211, 238, 0.6);
+  animation: tm-scanline 1.4s linear infinite;
+  pointer-events: none;
+}
+
+/* Ruído de TV sem sinal (silhueta sendo "reconstruída") */
+@keyframes tm-noise-shift {
+  0%   { background-position: 0 0; }
+  25%  { background-position: 30px -20px; }
+  50%  { background-position: -25px 15px; }
+  75%  { background-position: 15px 30px; }
+  100% { background-position: 0 0; }
+}
+.tm-noise {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.35;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='120' height='120' filter='url(%23n)' opacity='0.9'/></svg>");
+  animation: tm-noise-shift 0.3s infinite steps(1);
+}
+
+/* Anéis giratórios em volta do portal */
+.tm-ring {
+  position: absolute;
+  border-radius: 9999px;
+  pointer-events: none;
+}
+.tm-ring-dashed {
+  border: 2px dashed rgba(168, 85, 247, 0.55);
+}
+.tm-ring-conic {
+  background: conic-gradient(from 0deg, transparent 0deg, rgba(168, 85, 247, 0.9) 40deg, transparent 80deg, transparent 180deg, rgba(34, 211, 238, 0.9) 220deg, transparent 260deg);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
+}
+.tm-ring-ticks {
+  background: repeating-conic-gradient(from 0deg, rgba(216, 180, 254, 0.9) 0deg 1.5deg, transparent 1.5deg 10deg);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 10px), #000 calc(100% - 10px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 10px), #000 calc(100% - 10px));
+}
+
+/* Cursor piscando no terminal */
+@keyframes tm-blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+.tm-cursor::after {
+  content: '▍';
+  animation: tm-blink 0.8s infinite;
+  color: var(--tm-accent-2);
+}
+
+/* Cantos do HUD */
+.tm-corner {
+  position: absolute;
+  width: 42px;
+  height: 42px;
+  border-color: rgba(168, 85, 247, 0.7);
+  border-style: solid;
+  border-width: 0;
+  pointer-events: none;
+}
+.tm-corner.tl { top: 18px; left: 18px; border-top-width: 2px; border-left-width: 2px; }
+.tm-corner.tr { top: 18px; right: 18px; border-top-width: 2px; border-right-width: 2px; }
+.tm-corner.bl { bottom: 18px; left: 18px; border-bottom-width: 2px; border-left-width: 2px; }
+.tm-corner.br { bottom: 18px; right: 18px; border-bottom-width: 2px; border-right-width: 2px; }
+
+/* Barra de energia */
+.tm-energy-track {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(168, 85, 247, 0.35);
+}
+.tm-energy-fill {
+  background: linear-gradient(90deg, #7c3aed, #a855f7 50%, #22d3ee);
+  box-shadow: 0 0 18px rgba(168, 85, 247, 0.8);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tm-shake-soft, .tm-shake-hard { animation: none; }
+  .tm-ghost-r, .tm-ghost-c, .tm-glitch-slice { animation-duration: 1s; }
+}
+
+/* Anel lento dos cards e chips da home */
+@keyframes tm-spin { to { transform: rotate(360deg); } }
+.tm-spin-slow { animation: tm-spin 14s linear infinite; }
+.tm-spin-slower { animation: tm-spin 40s linear infinite; }
+
+/* Ponto de status "online" */
+@keyframes tm-pulse-dot {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); }
+  70% { box-shadow: 0 0 0 8px rgba(74, 222, 128, 0); }
+}
+.tm-dot-online { animation: tm-pulse-dot 1.8s ease-out infinite; }
+
+/* Retrato reagindo à voz: --lvl vai de 0 a 1 */
+.tm-voice-ring {
+  transform: scale(calc(1 + var(--lvl, 0) * 0.16));
+  opacity: calc(0.25 + var(--lvl, 0) * 0.75);
+  transition: transform 80ms linear, opacity 120ms linear;
+}
+.tm-voice-portrait {
+  transform: scale(calc(1 + var(--lvl, 0) * 0.04));
+  transition: transform 80ms linear;
+}
+.tm-mic-glow {
+  box-shadow: 0 0 0 calc(var(--mic, 0) * 14px) rgba(34, 211, 238, 0.25);
+  transition: box-shadow 90ms linear;
+}
+
+/* =====================================================================
+   Palco compartilhado: a mesma geometria do portal na home (modo portal),
+   na viagem e na conversa, para o retrato nunca "pular" entre as telas.
+   --portal-size: diâmetro do círculo central
+   --portal-cy:   posição vertical do centro do portal (em % da altura)
+   ===================================================================== */
+.tm-stage {
+  --portal-size: min(56vw, 18rem, 30vh);
+  --portal-size: min(56vw, 18rem, 30dvh);
+  --portal-cy: 38%;
+}
+@media (min-width: 768px) {
+  .tm-stage {
+    --portal-size: min(56vw, 18rem, 34vh);
+    --portal-size: min(56vw, 18rem, 34dvh);
+    --portal-cy: 41%;
+  }
+}
+/* Telas baixas e largas (celular deitado): portal menor e mais alto */
+@media (max-height: 480px) {
+  .tm-stage {
+    --portal-size: min(40vw, 12rem, 38vh);
+    --portal-size: min(40vw, 12rem, 38dvh);
+    --portal-cy: 40%;
+  }
+}
+.tm-stage-portal {
+  position: absolute;
+  left: 50%;
+  top: var(--portal-cy);
+  width: var(--portal-size);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+}
+.tm-stage-below {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(var(--portal-cy) + var(--portal-size) / 2);
+}
+.tm-stage-above {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(100% - var(--portal-cy) + var(--portal-size) / 2);
+}
+
+/* Anéis girando sozinhos (home e conversa). Sentidos alternados, como na viagem. */
+@keyframes tm-spin-rev { to { transform: rotate(-360deg); } }
+.tm-portal-idle .tm-ring:nth-child(1) { animation: tm-spin 26s linear infinite; }
+.tm-portal-idle .tm-ring:nth-child(2) { animation: tm-spin-rev 48s linear infinite; }
+.tm-portal-idle .tm-ring:nth-child(3) { animation: tm-spin 90s linear infinite; }
+.tm-portal-idle .tm-ring:nth-child(4) { animation: tm-spin-rev 16s linear infinite; }
+.tm-portal-idle .tm-ring { transition: opacity 0.6s ease; }
+
+/* Portal reagindo à voz do personagem (--lvl de 0 a 1) */
+.tm-portal-voice .tm-ring:nth-child(1) { opacity: calc(0.55 + var(--lvl, 0) * 0.45) !important; }
+.tm-portal-voice .tm-ring:nth-child(4) { opacity: calc(0.2 + var(--lvl, 0) * 0.5) !important; }
+
+/* =====================================================================
+   Home em modo portal: carrosséis deslizantes
+   ===================================================================== */
+.tm-carousel {
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  overscroll-behavior-x: contain;
+}
+.tm-carousel::-webkit-scrollbar { display: none; }
+.tm-carousel > * { scroll-snap-align: center; scroll-snap-stop: always; flex-shrink: 0; }
+/* Espaço nas pontas para o primeiro e o último item também centralizarem */
+.tm-carousel-faces { padding-inline: calc(50% - var(--face-w) / 2); }
+.tm-carousel-faces > * { width: var(--face-w); }
+
+.tm-face {
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease, filter 0.35s ease;
+  opacity: 0.45;
+  transform: scale(0.82);
+  filter: grayscale(0.6);
+}
+.tm-face[data-active='true'] {
+  opacity: 1;
+  transform: scale(1);
+  filter: none;
+}
+
+/* Retrato que troca dentro do portal */
+.tm-portal-face { position: absolute; inset: 0; border-radius: 9999px; overflow: hidden; }
+
+/* Botão "segure para falar" */
+.tm-ptt {
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.15s ease, box-shadow 0.12s linear;
+  box-shadow: 0 0 0 calc(var(--mic, 0) * 18px) rgba(34, 211, 238, 0.22), 0 0 32px rgba(34, 211, 238, calc(0.15 + var(--mic, 0) * 0.5));
+}
+.tm-ptt[data-holding='true'] { transform: scale(1.06); }
+@keyframes tm-ptt-breathe {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.35), 0 0 24px rgba(34, 211, 238, 0.2); }
+  50% { box-shadow: 0 0 0 10px rgba(34, 211, 238, 0), 0 0 40px rgba(34, 211, 238, 0.35); }
+}
+.tm-ptt[data-ready='true'][data-holding='false'] { animation: tm-ptt-breathe 2.4s ease-in-out infinite; }
+
+/* Legenda sincronizada: a palavra mais recente entra suave */
+.tm-caption-word { display: inline; animation: tm-word-in 0.18s ease-out both; }
+@keyframes tm-word-in { from { opacity: 0; filter: blur(3px); } to { opacity: 1; filter: blur(0); } }
+
+/* Altura útil que acompanha a barra do navegador no celular */
+.tm-screen { height: 100vh; height: 100dvh; }
+
+/* Home em modo portal: em telas baixas o portal encolhe um pouco para
+   caber setores, nome, carrossel e botão sem rolagem */
+.tm-stage { --home-portal-scale: 1; }
+@media (max-height: 700px) { .tm-stage { --home-portal-scale: 0.82; } }
+@media (max-height: 560px) { .tm-stage { --home-portal-scale: 0.7; } }
+
+/* Legenda da conversa: até ~3 linhas, ancorada embaixo; o que já foi dito
+   sai por cima com fade em vez de empurrar a interface */
+.tm-caption {
+  font-size: 1rem;
+  line-height: 1.45;
+  text-wrap: balance;
+}
+@media (min-width: 640px) { .tm-caption { font-size: 1.15rem; } }
+@media (min-width: 1024px) { .tm-caption { font-size: 1.35rem; } }
+.tm-caption-box {
+  min-height: 0;
+  max-height: calc(1rem * 1.45 * 3 + 1.25rem);
+  overflow: hidden;
+  padding: 0.5rem 1rem 0.6rem;
+  border-radius: 1.25rem;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 28%, #000 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 28%, #000 100%);
+  transition: background-color 0.4s ease, box-shadow 0.4s ease;
+}
+@media (min-width: 640px) { .tm-caption-box { max-height: calc(1.15rem * 1.45 * 3 + 1.25rem); } }
+@media (min-width: 1024px) { .tm-caption-box { max-height: calc(1.35rem * 1.45 * 3 + 1.25rem); } }
+.tm-caption-box-on {
+  background-color: rgba(4, 0, 12, 0.62);
+  box-shadow: 0 0 0 1px rgba(168, 85, 247, 0.18), 0 10px 40px rgba(0, 0, 0, 0.45);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}

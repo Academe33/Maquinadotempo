@@ -5,6 +5,7 @@ import http from 'http';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
+import { synthesize, VOICE_PRESETS, getApiKey as getElevenKey } from './services/ttsServer.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -21,6 +22,9 @@ function getApiKey() {
 
 if (!getApiKey()) {
   console.warn('AVISO: GEMINI_API_KEY nao esta configurada no ambiente do servidor.');
+}
+if (!getElevenKey()) {
+  console.warn('AVISO: ELEVEN_API_KEY nao esta configurada; as vozes vao cair no sintetizador do navegador.');
 }
 
 // 1. Endpoint REST seguro para gerar o perfil do personagem
@@ -87,6 +91,26 @@ app.post('/api/live-token', async (req, res) => {
     res.json({ token: token.name });
   } catch (error) {
     console.error('Erro ao criar token efêmero:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// 3. Voz (ElevenLabs) com cache em disco. Só aceita as vozes conhecidas e
+// textos curtos, para ninguém gastar os créditos da conta à toa.
+app.post('/api/tts', async (req, res) => {
+  try {
+    const { voice, text } = req.body ?? {};
+    if (!VOICE_PRESETS[voice]) return res.status(400).json({ error: 'Voz inválida' });
+    const { buffer, cached } = await synthesize(voice, text);
+    res.set({
+      'Content-Type': 'audio/mpeg',
+      'Content-Length': String(buffer.length),
+      'Cache-Control': 'public, max-age=31536000, immutable',
+      'X-Voice-Cache': cached ? 'HIT' : 'MISS',
+    });
+    res.send(buffer);
+  } catch (error) {
+    console.error('Erro ao gerar voz:', error.message);
     res.status(500).json({ error: error.message });
   }
 });
